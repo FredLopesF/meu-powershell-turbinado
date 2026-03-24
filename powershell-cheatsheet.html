@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PowerShell Turbinado — Cheat Sheet</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#282a36;--current:#44475a;--surface:#2d2f3d;--surface2:#353849;--border:#44475a;--fg:#f8f8f2;--text:#e2e2dc;--text-dim:#8690b3;--comment:#6272a4;--cyan:#8be9fd;--green:#50fa7b;--orange:#ffb86c;--pink:#ff79c6;--purple:#bd93f9;--red:#ff5555;--yellow:#f1fa8c;--mono:'JetBrains Mono',monospace;--sans:'Outfit',system-ui,sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(189,147,249,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(189,147,249,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+.container{position:relative;z-index:1;max-width:1120px;margin:0 auto;padding:48px 24px 80px}
+a{color:var(--purple);text-decoration:none;border-bottom:1px solid rgba(189,147,249,.3);transition:border-color .2s,color .2s}a:hover{color:var(--pink);border-color:var(--pink)}
+code{font-family:var(--mono);font-size:.9em;color:var(--cyan);background:rgba(139,233,253,.08);padding:1px 5px;border-radius:3px}
+
+header{text-align:center;margin-bottom:64px}
+.vb{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--purple);background:rgba(189,147,249,.1);border:1px solid rgba(189,147,249,.25);padding:6px 16px;border-radius:20px;margin-bottom:20px}
+.vb .dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+h1{font-size:clamp(2.2rem,5vw,3.6rem);font-weight:800;letter-spacing:-1.5px;color:var(--fg);margin-bottom:10px}
+h1 .hl{color:var(--purple)}h1 .hl2{color:var(--pink)}
+.subtitle{color:var(--comment);font-size:1.05rem;max-width:560px;margin:0 auto}
+.hd{width:80px;height:3px;margin:28px auto 0;border-radius:3px;background:linear-gradient(90deg,var(--purple),var(--pink),var(--cyan))}
+
+section{margin-bottom:52px}
+.sh{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.si{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;border:1px solid}
+h2{font-size:1.4rem;font-weight:700;color:var(--fg);letter-spacing:-.3px}
+.sd{color:var(--comment);font-size:13.5px;margin:-12px 0 18px 54px}
+
+.grid{display:grid;gap:10px}.g2{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}.g3{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}.g4{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;transition:border-color .25s,transform .15s,box-shadow .25s}
+.card:hover{border-color:rgba(189,147,249,.35);transform:translateY(-1px);box-shadow:0 4px 24px rgba(189,147,249,.08)}
+.cl{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
+.row{display:flex;align-items:baseline;gap:12px;padding:6px 0;border-bottom:1px solid rgba(68,71,90,.5)}.row:last-child{border-bottom:none}
+.rk{font-family:var(--mono);font-size:13px;font-weight:600;white-space:nowrap;min-width:110px;flex-shrink:0}.rv{font-size:13.5px;color:var(--text-dim)}
+
+.tw{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--comment);text-align:left;padding:14px 18px 10px;border-bottom:1px solid var(--border)}
+td{padding:10px 18px;border-bottom:1px solid rgba(68,71,90,.4);vertical-align:top}tr:last-child td{border-bottom:none}
+td:first-child{font-family:var(--mono);font-weight:600;font-size:13px;white-space:nowrap}
+tr:hover td{background:rgba(189,147,249,.04)}
+
+.stack{display:flex;flex-direction:column;gap:8px}
+.si2{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:14px;transition:border-color .2s}.si2:hover{border-color:rgba(189,147,249,.3)}
+.sd2{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sn{font-family:var(--mono);font-size:13px;font-weight:600;min-width:140px;flex-shrink:0}
+.sdesc{font-size:13px;color:var(--text-dim)}.st{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:4px;margin-left:auto;flex-shrink:0;white-space:nowrap}
+
+.mc{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;transition:border-color .2s}.mc:hover{border-color:rgba(80,250,123,.3)}
+.mh{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.ma{color:var(--comment);font-size:14px}
+.mz{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--red);background:rgba(255,85,85,.1);padding:2px 8px;border-radius:4px;text-decoration:line-through;opacity:.6}
+.mp{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--green);background:rgba(80,250,123,.1);padding:2px 8px;border-radius:4px}
+.md{font-size:13px;color:var(--text-dim);margin-top:4px}
+.ms{display:inline-block;font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:4px;margin-top:6px}
+
+.tc{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;transition:border-color .2s}.tc:hover{border-color:rgba(139,233,253,.3)}
+.tc-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.tc-old{font-family:var(--mono);font-size:11px;color:var(--text-dim);text-decoration:line-through;opacity:.5}
+.tc-new{font-family:var(--mono);font-size:13px;font-weight:700}
+.tc-install{font-family:var(--mono);font-size:11px;color:var(--comment);margin-top:6px;padding:4px 8px;background:rgba(0,0,0,.2);border-radius:4px;display:inline-block}
+.tc-use{font-family:var(--mono);font-size:11px;color:var(--cyan);margin-top:4px}
+
+.cb{background:#21222c;border:1px solid var(--border);border-radius:12px;padding:20px 22px;font-family:var(--mono);font-size:12.5px;line-height:1.8;overflow-x:auto;white-space:pre}
+.cb .cm{color:var(--comment)}.cb .cmd{color:var(--green)}.cb .fl{color:var(--orange)}.cb .str{color:var(--yellow)}.cb .var{color:var(--purple)}.cb .kw{color:var(--pink)}
+
+.bonus{background:linear-gradient(135deg,rgba(189,147,249,.08),rgba(255,121,198,.06));border:1px solid rgba(189,147,249,.2);border-radius:14px;padding:24px;margin-top:12px}
+.bt{font-size:1rem;font-weight:700;color:var(--fg);margin-bottom:12px}
+
+.c-purple{color:var(--purple)}.c-pink{color:var(--pink)}.c-green{color:var(--green)}.c-cyan{color:var(--cyan)}.c-orange{color:var(--orange)}.c-yellow{color:var(--yellow)}.c-red{color:var(--red)}
+.bg-purple{background:rgba(189,147,249,.1);border-color:rgba(189,147,249,.2)}.bg-pink{background:rgba(255,121,198,.1);border-color:rgba(255,121,198,.2)}.bg-green{background:rgba(80,250,123,.1);border-color:rgba(80,250,123,.2)}.bg-cyan{background:rgba(139,233,253,.1);border-color:rgba(139,233,253,.2)}.bg-orange{background:rgba(255,184,108,.1);border-color:rgba(255,184,108,.2)}.bg-yellow{background:rgba(241,250,140,.1);border-color:rgba(241,250,140,.2)}.bg-red{background:rgba(255,85,85,.1);border-color:rgba(255,85,85,.2)}
+
+footer{text-align:center;margin-top:64px;padding-top:24px;border-top:1px solid var(--border);color:var(--comment);font-size:12px;font-family:var(--mono);letter-spacing:.5px}footer span{color:var(--purple)}
+
+@media(max-width:640px){.g2,.g3,.g4{grid-template-columns:1fr}.rk{min-width:85px}.si2{flex-wrap:wrap}.sn{min-width:unset}.st{margin-left:0;margin-top:4px}.mh{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="vb"><span class="dot"></span> PowerShell 7 + Oh My Posh</div>
+  <h1>PowerShell <span class="hl">Turbi</span><span class="hl2">nado</span></h1>
+  <p class="subtitle">Tudo que o Zsh tem de bom &mdash; agora no teu Windows. Com ferramentas modernas, fun&ccedil;&otilde;es custom e links.</p>
+  <div class="hd"></div>
+</header>
+
+<!-- ═══════ STACK ═══════ -->
+<section>
+  <div class="sh"><div class="si bg-purple" style="color:var(--purple)">&#x1F4E6;</div><h2>Stack Instalada</h2></div>
+  <div class="stack">
+    <div class="si2"><div class="sd2" style="background:var(--purple)"></div><span class="sn c-purple">Oh My Posh</span><span class="sdesc">Theme engine &bull; <a href="https://ohmyposh.dev/" target="_blank">ohmyposh.dev</a></span><span class="st c-purple bg-purple">prompt</span></div>
+    <div class="si2"><div class="sd2" style="background:var(--green)"></div><span class="sn c-green">PSReadLine</span><span class="sdesc">Completa&ccedil;&atilde;o, hist&oacute;rico, syntax highlighting &bull; <a href="https://github.com/PowerShell/PSReadLine" target="_blank">GitHub</a></span><span class="st c-green bg-green">core</span></div>
+    <div class="si2"><div class="sd2" style="background:var(--cyan)"></div><span class="sn c-cyan">PSFzf + fzf</span><span class="sdesc">Fuzzy finder &bull; <a href="https://github.com/kelleyma49/PSFzf" target="_blank">PSFzf</a> &bull; <a href="https://github.com/junegunn/fzf" target="_blank">fzf</a></span><span class="st c-cyan bg-cyan">busca</span></div>
+    <div class="si2"><div class="sd2" style="background:var(--yellow)"></div><span class="sn c-yellow">Terminal-Icons</span><span class="sdesc">&Iacute;cones Nerd Font &bull; <a href="https://github.com/devblackops/Terminal-Icons" target="_blank">GitHub</a></span><span class="st c-yellow bg-yellow">visual</span></div>
+    <div class="si2"><div class="sd2" style="background:var(--orange)"></div><span class="sn c-orange">posh-git</span><span class="sdesc">Git no prompt &bull; <a href="https://github.com/dahlbyk/posh-git" target="_blank">GitHub</a></span><span class="st c-orange bg-orange">git</span></div>
+    <div class="si2"><div class="sd2" style="background:var(--pink)"></div><span class="sn c-pink">ZLocation</span><span class="sdesc">Pula pra dirs frequentes &bull; <a href="https://github.com/vors/ZLocation" target="_blank">GitHub</a></span><span class="st c-pink bg-pink">navega&ccedil;&atilde;o</span></div>
+    <div class="si2"><div class="sd2" style="background:var(--red)"></div><span class="sn c-red">gsudo</span><span class="sdesc">sudo do Windows &bull; <a href="https://github.com/gerardog/gsudo" target="_blank">GitHub</a></span><span class="st c-red bg-red">admin</span></div>
+  </div>
+</section>
+
+<!-- ═══════ ZSH MAPPING ═══════ -->
+<section>
+  <div class="sh"><div class="si bg-green" style="color:var(--green)">&#x1F504;</div><h2>Zsh &rarr; PowerShell: De/Para</h2></div>
+  <p class="sd">Plugins mais populares do <a href="https://github.com/ohmyzsh/ohmyzsh/wiki/Plugins" target="_blank">Oh My Zsh</a> e seus equivalentes</p>
+  <div class="grid g2">
+    <div class="mc"><div class="mh"><span class="mz">zsh-autosuggestions</span><span class="ma">&rarr;</span><span class="mp">PSReadLine</span></div><div class="md">Sugest&atilde;o cinza enquanto digita. Aceita com <code>&rarr;</code></div><span class="ms c-green bg-green">&#x2713; instalado</span></div>
+    <div class="mc"><div class="mh"><span class="mz">zsh-syntax-highlighting</span><span class="ma">&rarr;</span><span class="mp">PSReadLine Colors</span></div><div class="md">Coloriza comandos, strings, vari&aacute;veis em tempo real</div><span class="ms c-green bg-green">&#x2713; instalado</span></div>
+    <div class="mc"><div class="mh"><span class="mz">git plugin</span><span class="ma">&rarr;</span><span class="mp">posh-git + aliases</span></div><div class="md">Branch no prompt, tab completion, aliases <code>gst gaa gc gp</code></div><span class="ms c-green bg-green">&#x2713; instalado</span></div>
+    <div class="mc"><div class="mh"><span class="mz">fzf plugin</span><span class="ma">&rarr;</span><span class="mp">PSFzf</span></div><div class="md"><code>Ctrl+R</code> hist&oacute;rico, <code>Ctrl+T</code> arquivos</div><span class="ms c-green bg-green">&#x2713; instalado</span></div>
+    <div class="mc"><div class="mh"><span class="mz">z / autojump</span><span class="ma">&rarr;</span><span class="mp">ZLocation</span></div><div class="md">Pula pra diret&oacute;rios frequentes: <code>z nway</code></div><span class="ms c-green bg-green">&#x2713; instalado</span></div>
+    <div class="mc"><div class="mh"><span class="mz">sudo plugin</span><span class="ma">&rarr;</span><span class="mp">gsudo</span></div><div class="md">Roda como admin: <code>gsudo netstat -ano</code></div><span class="ms c-green bg-green">&#x2713; instalado</span></div>
+    <div class="mc"><div class="mh"><span class="mz">history-substring-search</span><span class="ma">&rarr;</span><span class="mp">PSReadLine &uarr;&darr;</span></div><div class="md">Digita in&iacute;cio, <code>&uarr;</code><code>&darr;</code> filtra pelo que digitou</div><span class="ms c-green bg-green">&#x2713; instalado</span></div>
+    <div class="mc"><div class="mh"><span class="mz">jsontools</span><span class="ma">&rarr;</span><span class="mp">jq + ConvertFrom-Json</span></div><div class="md"><code>cat x.json | jq '.status'</code> ou nativo do PS</div><span class="ms c-green bg-green">&#x2713; instalado</span></div>
+    <div class="mc"><div class="mh"><span class="mz">extract</span><span class="ma">&rarr;</span><span class="mp">fun&ccedil;&atilde;o custom</span></div><div class="md">Extrai .zip .tar.gz .7z .rar com um comando</div><span class="ms c-cyan bg-cyan">&#x2193; profile</span></div>
+    <div class="mc"><div class="mh"><span class="mz">copypath</span><span class="ma">&rarr;</span><span class="mp">fun&ccedil;&atilde;o custom</span></div><div class="md">Copia caminho atual pro clipboard</div><span class="ms c-cyan bg-cyan">&#x2193; profile</span></div>
+    <div class="mc"><div class="mh"><span class="mz">web-search</span><span class="ma">&rarr;</span><span class="mp">fun&ccedil;&atilde;o custom</span></div><div class="md"><code>google "postgresql vacuum"</code> abre no browser</div><span class="ms c-cyan bg-cyan">&#x2193; profile</span></div>
+    <div class="mc"><div class="mh"><span class="mz">colored-man-pages</span><span class="ma">&rarr;</span><span class="mp">bat</span></div><div class="md"><code>bat</code> mostra qualquer arquivo com syntax highlighting</div><span class="ms c-green bg-green">&#x2713; instalado</span></div>
+  </div>
+</section>
+
+<!-- ═══════ CLI MODERNAS ═══════ -->
+<section>
+  <div class="sh"><div class="si bg-cyan" style="color:var(--cyan)">&#x26A1;</div><h2>Ferramentas CLI Modernas</h2></div>
+  <p class="sd">Substituem comandos antigos por vers&otilde;es mais r&aacute;pidas e bonitas</p>
+  <div class="grid g3">
+    <div class="tc"><div class="tc-head"><span class="tc-old">cat</span><span class="ma">&rarr;</span><span class="tc-new c-green"><a href="https://github.com/sharkdp/bat" target="_blank">bat</a></span></div><div class="md">Syntax highlighting, n&uacute;meros de linha, git</div><div class="tc-use">bat arquivo.ps1</div></div>
+    <div class="tc"><div class="tc-head"><span class="tc-old">ls</span><span class="ma">&rarr;</span><span class="tc-new c-green"><a href="https://github.com/eza-community/eza" target="_blank">eza</a></span></div><div class="md">&Iacute;cones, cores, git status, tree</div><div class="tc-use">eza -la --icons --git</div></div>
+    <div class="tc"><div class="tc-head"><span class="tc-old">grep</span><span class="ma">&rarr;</span><span class="tc-new c-green"><a href="https://github.com/BurntSushi/ripgrep" target="_blank">ripgrep (rg)</a></span></div><div class="md">10x mais r&aacute;pido, .gitignore aware</div><div class="tc-use">rg "SELECT" --type sql</div></div>
+    <div class="tc"><div class="tc-head"><span class="tc-old">find</span><span class="ma">&rarr;</span><span class="tc-new c-green"><a href="https://github.com/sharkdp/fd" target="_blank">fd</a></span></div><div class="md">Sintaxe simples, r&aacute;pido</div><div class="tc-use">fd "\.log$" /var</div></div>
+    <div class="tc"><div class="tc-head"><span class="tc-old">git diff</span><span class="ma">&rarr;</span><span class="tc-new c-green"><a href="https://github.com/so-fancy/diff-so-fancy" target="_blank">diff-so-fancy</a></span></div><div class="md">Diff humanamente leg&iacute;vel</div><div class="tc-use">git diff | diff-so-fancy</div></div>
+    <div class="tc"><div class="tc-head"><span class="tc-old">man</span><span class="ma">&rarr;</span><span class="tc-new c-green"><a href="https://github.com/tldr-pages/tlrc" target="_blank">tldr</a></span></div><div class="md">Resumo pr&aacute;tico de comandos</div><div class="tc-use">tldr tar</div></div>
+  </div>
+</section>
+
+<!-- ═══════ FERRAMENTAS DE INFRA ═══════ -->
+<section>
+  <div class="sh"><div class="si bg-orange" style="color:var(--orange)">&#x1F6E0;</div><h2>Ferramentas de Infra &amp; Database</h2></div>
+  <p class="sd">Espec&iacute;ficas pro dia a dia de suporte, PostgreSQL e rede</p>
+  <div class="grid g2">
+    <div class="tc"><div class="tc-head"><span class="tc-new c-orange"><a href="https://github.com/dbcli/pgcli" target="_blank">pgcli</a></span></div><div class="md">Cliente PostgreSQL com autocomplete inteligente e syntax highlighting. Substitui o psql.</div><div class="tc-use">pgcli -h servidor -U usuario -d banco</div></div>
+    <div class="tc"><div class="tc-head"><span class="tc-new c-orange"><a href="https://github.com/xo/usql" target="_blank">usql</a></span></div><div class="md">Cliente SQL universal &mdash; PostgreSQL, MySQL, SQLite, SQL Server num comando s&oacute;.</div><div class="tc-use">usql pg://user:pass@host/db</div></div>
+    <div class="tc"><div class="tc-head"><span class="tc-new c-orange"><a href="https://nmap.org/" target="_blank">nmap</a></span></div><div class="md">Scanner de rede. Descobre hosts, portas abertas, servi&ccedil;os, OS detection.</div><div class="tc-use">nmap -sP 192.168.1.0/24</div></div>
+    <div class="tc"><div class="tc-head"><span class="tc-new c-orange"><a href="https://github.com/White-Tiger/WinMTR" target="_blank">WinMTR</a></span></div><div class="md">Traceroute visual cont&iacute;nuo. Mostra perda de pacote por hop em tempo real.</div><div class="tc-use">winmtr</div></div>
+    <div class="tc"><div class="tc-head"><span class="tc-new c-orange"><a href="https://github.com/mr-karan/doggo" target="_blank">doggo</a></span></div><div class="md">DNS lookup moderno. Substitui dig/nslookup com output colorido.</div><div class="tc-use">doggo google.com A MX</div></div>
+    <div class="tc"><div class="tc-head"><span class="tc-old">ping</span><span class="ma">&rarr;</span><span class="tc-new c-orange"><a href="https://github.com/orf/gping" target="_blank">gping</a></span></div><div class="md">Ping gr&aacute;fico de m&uacute;ltiplos hosts ao mesmo tempo.</div><div class="tc-use">gping google.com 8.8.8.8 1.1.1.1</div></div>
+  </div>
+</section>
+
+<!-- ═══════ FERRAMENTAS DE PRODUTIVIDADE ═══════ -->
+<section>
+  <div class="sh"><div class="si bg-pink" style="color:var(--pink)">&#x1F680;</div><h2>Produtividade</h2></div>
+  <div class="grid g2">
+    <div class="tc"><div class="tc-head"><span class="tc-new c-pink"><a href="https://github.com/jesseduffield/lazygit" target="_blank">lazygit</a></span></div><div class="md">Interface visual completa pro git no terminal. Stage, commit, push, merge, rebase &mdash; tudo visual.</div><div class="tc-use">lazygit</div></div>
+    <div class="tc"><div class="tc-head"><span class="tc-old">htop</span><span class="ma">&rarr;</span><span class="tc-new c-pink"><a href="https://github.com/aristocratos/btop" target="_blank">btop</a></span></div><div class="md">Monitor de sistema completo. CPU, mem&oacute;ria, disco, rede, processos. Bonit&atilde;o.</div><div class="tc-use">btop</div></div>
+    <div class="tc"><div class="tc-head"><span class="tc-old">df</span><span class="ma">&rarr;</span><span class="tc-new c-pink"><a href="https://github.com/muesli/duf" target="_blank">duf</a></span></div><div class="md">Espa&ccedil;o em disco com tabela colorida e barra de progresso.</div><div class="tc-use">duf</div></div>
+    <div class="tc"><div class="tc-head"><span class="tc-new c-pink"><a href="https://github.com/XAMPPRocky/tokei" target="_blank">tokei</a></span></div><div class="md">Conta linhas de c&oacute;digo por linguagem num diret&oacute;rio.</div><div class="tc-use">tokei .</div></div>
+    <div class="tc"><div class="tc-head"><span class="tc-new c-pink"><a href="https://github.com/sharkdp/hyperfine" target="_blank">hyperfine</a></span></div><div class="md">Benchmark de comandos. Mede tempo m&eacute;dio, warmup, compara&ccedil;&atilde;o lado a lado.</div><div class="tc-use">hyperfine "rg texto" "grep texto"</div></div>
+    <div class="tc"><div class="tc-head"><span class="tc-new c-pink"><a href="https://jqlang.github.io/jq/" target="_blank">jq</a></span></div><div class="md">Processar e filtrar JSON no terminal. Essencial pra APIs e logs.</div><div class="tc-use">cat log.json | jq '.[] | .status'</div></div>
+  </div>
+</section>
+
+<!-- ═══════ ATALHOS ═══════ -->
+<section>
+  <div class="sh"><div class="si bg-cyan" style="color:var(--cyan)">&#x2328;</div><h2>Atalhos de Teclado</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th>Atalho</th><th>A&ccedil;&atilde;o</th><th>M&oacute;dulo</th></tr></thead>
+    <tbody>
+      <tr><td class="c-cyan">Tab</td><td>Menu de completa&ccedil;&atilde;o interativo</td><td>PSReadLine</td></tr>
+      <tr><td class="c-cyan">&uarr; / &darr;</td><td>Filtra hist&oacute;rico pelo que digitou</td><td>PSReadLine</td></tr>
+      <tr><td class="c-cyan">&rarr;</td><td>Aceita sugest&atilde;o preditiva</td><td>PSReadLine</td></tr>
+      <tr><td class="c-cyan">Ctrl+R</td><td>Busca fuzzy no hist&oacute;rico</td><td>PSFzf</td></tr>
+      <tr><td class="c-cyan">Ctrl+T</td><td>Busca fuzzy de arquivos</td><td>PSFzf</td></tr>
+      <tr><td class="c-cyan">Ctrl+L</td><td>Limpa a tela</td><td>PSReadLine</td></tr>
+      <tr><td class="c-cyan">Ctrl+D</td><td>Fecha o terminal</td><td>PSReadLine</td></tr>
+      <tr><td class="c-cyan">Ctrl+A</td><td>In&iacute;cio da linha</td><td>PSReadLine</td></tr>
+      <tr><td class="c-cyan">Ctrl+E</td><td>Final da linha</td><td>PSReadLine</td></tr>
+      <tr><td class="c-cyan">Ctrl+W</td><td>Apaga palavra anterior</td><td>PSReadLine</td></tr>
+      <tr><td class="c-cyan">Ctrl+Space</td><td>For&ccedil;a menu de completa&ccedil;&atilde;o</td><td>PSReadLine</td></tr>
+      <tr><td class="c-cyan">Alt+.</td><td>&Uacute;ltimo argumento do comando anterior</td><td>PSReadLine</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ═══════ GIT ═══════ -->
+<section>
+  <div class="sh"><div class="si bg-orange" style="color:var(--orange)">&#x1F500;</div><h2>Git &mdash; Aliases</h2></div>
+  <p class="sd">Pra opera&ccedil;&otilde;es visuais, usa <code>lazygit</code> dentro do repo</p>
+  <div class="tw"><table>
+    <thead><tr><th>Alias</th><th>Comando</th><th>O que faz</th></tr></thead>
+    <tbody>
+      <tr><td class="c-orange">gst</td><td>git status</td><td>Status do repo</td></tr>
+      <tr><td class="c-orange">ga arquivo</td><td>git add</td><td>Adiciona ao stage</td></tr>
+      <tr><td class="c-orange">gaa</td><td>git add --all</td><td>Stage de tudo</td></tr>
+      <tr><td class="c-orange">gc "msg"</td><td>git commit -m</td><td>Commit</td></tr>
+      <tr><td class="c-orange">gp</td><td>git push</td><td>Envia pro remoto</td></tr>
+      <tr><td class="c-orange">gl</td><td>git pull</td><td>Puxa do remoto</td></tr>
+      <tr><td class="c-orange">glog</td><td>git log --oneline --graph -20</td><td>Hist&oacute;rico visual</td></tr>
+      <tr><td class="c-orange">gd</td><td>git diff</td><td>Diferen&ccedil;as</td></tr>
+      <tr><td class="c-orange">gb</td><td>git branch</td><td>Branches</td></tr>
+      <tr><td class="c-orange">gco branch</td><td>git checkout</td><td>Troca branch</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ═══════ ALIASES ═══════ -->
+<section>
+  <div class="sh"><div class="si bg-pink" style="color:var(--pink)">&#x1F4C2;</div><h2>Aliases &mdash; Navega&ccedil;&atilde;o, Arquivos e Sistema</h2></div>
+  <div class="grid g3">
+    <div class="card"><div class="cl c-cyan">Navega&ccedil;&atilde;o</div>
+      <div class="row"><span class="rk c-cyan">ll</span><span class="rv">Lista tudo (eza se instalado)</span></div>
+      <div class="row"><span class="rk c-cyan">la</span><span class="rv">S&oacute; ocultos</span></div>
+      <div class="row"><span class="rk c-cyan">lt</span><span class="rv">Tree view (eza)</span></div>
+      <div class="row"><span class="rk c-cyan">..</span><span class="rv">Volta um dir</span></div>
+      <div class="row"><span class="rk c-cyan">...</span><span class="rv">Volta dois dirs</span></div>
+      <div class="row"><span class="rk c-cyan">~</span><span class="rv">Home</span></div>
+      <div class="row"><span class="rk c-cyan">mkcd</span><span class="rv">Cria + entra</span></div>
+      <div class="row"><span class="rk c-cyan">z nome</span><span class="rv">Pula pra dir frequente</span></div>
+    </div>
+    <div class="card"><div class="cl c-pink">Arquivos</div>
+      <div class="row"><span class="rk c-pink">cat</span><span class="rv">bat com syntax highlighting</span></div>
+      <div class="row"><span class="rk c-pink">touch</span><span class="rv">Cria arquivo</span></div>
+      <div class="row"><span class="rk c-pink">head</span><span class="rv">10 primeiras linhas</span></div>
+      <div class="row"><span class="rk c-pink">tail</span><span class="rv">10 &uacute;ltimas linhas</span></div>
+      <div class="row"><span class="rk c-pink">grep / rg</span><span class="rv">Busca texto</span></div>
+      <div class="row"><span class="rk c-pink">which</span><span class="rv">Caminho do cmd</span></div>
+      <div class="row"><span class="rk c-pink">extract</span><span class="rv">Descompacta qualquer formato</span></div>
+    </div>
+    <div class="card"><div class="cl c-green">Sistema / Rede / Clipboard</div>
+      <div class="row"><span class="rk c-green">duf</span><span class="rv">Espa&ccedil;o em disco visual</span></div>
+      <div class="row"><span class="rk c-green">btop</span><span class="rv">Monitor de sistema</span></div>
+      <div class="row"><span class="rk c-green">myip</span><span class="rv">IP p&uacute;blico</span></div>
+      <div class="row"><span class="rk c-green">ports</span><span class="rv">Portas LISTENING</span></div>
+      <div class="row"><span class="rk c-green">copypath</span><span class="rv">Copia path pro clipboard</span></div>
+      <div class="row"><span class="rk c-green">copyfile</span><span class="rv">Copia conte&uacute;do do arq</span></div>
+      <div class="row"><span class="rk c-green">google</span><span class="rv">Busca no browser</span></div>
+      <div class="row"><span class="rk c-green">open</span><span class="rv">Abre arquivo/pasta</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ DRACULA ═══════ -->
+<section>
+  <div class="sh"><div class="si bg-purple" style="color:var(--purple)">&#x1F3A8;</div><h2>Syntax Highlighting &mdash; <a href="https://draculatheme.com/" target="_blank">Dracula</a></h2></div>
+  <div class="cb">
+<span class="cmd">Set-PSReadLineOption</span> <span class="fl">-Colors</span> @{
+    Command            = <span class="str">'#50fa7b'</span>   <span class="cm"># green</span>
+    Parameter          = <span class="str">'#ffb86c'</span>   <span class="cm"># orange</span>
+    Operator           = <span class="str">'#ff79c6'</span>   <span class="cm"># pink</span>
+    Variable           = <span class="str">'#bd93f9'</span>   <span class="cm"># purple</span>
+    String             = <span class="str">'#f1fa8c'</span>   <span class="cm"># yellow</span>
+    Number             = <span class="str">'#bd93f9'</span>   <span class="cm"># purple</span>
+    Type               = <span class="str">'#8be9fd'</span>   <span class="cm"># cyan</span>
+    Comment            = <span class="str">'#6272a4'</span>   <span class="cm"># comment</span>
+    Keyword            = <span class="str">'#ff79c6'</span>   <span class="cm"># pink</span>
+    Error              = <span class="str">'#ff5555'</span>   <span class="cm"># red</span>
+    Member             = <span class="str">'#8be9fd'</span>   <span class="cm"># cyan</span>
+    InlinePrediction   = <span class="str">'#6272a4'</span>   <span class="cm"># comment</span>
+    ListPrediction     = <span class="str">'#bd93f9'</span>   <span class="cm"># purple</span>
+    Selection          = <span class="str">'#44475a'</span>   <span class="cm"># current</span>
+}</div>
+</section>
+
+<!-- ═══════ MANUTENÇÃO ═══════ -->
+<section>
+  <div class="sh"><div class="si bg-yellow" style="color:var(--yellow)">&#x1F504;</div><h2>Manuten&ccedil;&atilde;o</h2></div>
+  <div class="grid g2">
+    <div class="card"><div class="cl c-yellow">Atualizar tudo</div><div class="cb" style="font-size:11.5px">
+<span class="cm"># Oh My Posh + CLI tools</span>
+<span class="cmd">winget</span> upgrade JanDeDobbeleer.OhMyPosh
+<span class="cmd">winget</span> upgrade junegunn.fzf
+<span class="cmd">winget</span> upgrade sharkdp.bat
+<span class="cmd">winget</span> upgrade sharkdp.fd
+<span class="cmd">winget</span> upgrade sharkdp.hyperfine
+<span class="cmd">winget</span> upgrade BurntSushi.ripgrep
+<span class="cmd">winget</span> upgrade eza-community.eza
+<span class="cmd">winget</span> upgrade jqlang.jq
+<span class="cmd">winget</span> upgrade muesli.duf
+<span class="cmd">winget</span> upgrade orf.gping
+<span class="cmd">winget</span> upgrade JesseDuffield.lazygit
+<span class="cmd">winget</span> upgrade gerardog.gsudo
+<span class="cmd">winget</span> upgrade mr-karan.doggo
+
+<span class="cm"># M&oacute;dulos PowerShell</span>
+<span class="cmd">Update-Module</span> PSReadLine, PSFzf, Terminal-Icons, posh-git, ZLocation
+
+<span class="cm"># Python tools</span>
+<span class="cmd">pip</span> install --upgrade pgcli usql</div></div>
+    <div class="card"><div class="cl c-yellow">Trocar tema</div><div class="cb" style="font-size:11.5px">
+<span class="cm"># Listar temas locais</span>
+<span class="cmd">Get-ChildItem</span> <span class="var">$env:POSH_THEMES_PATH</span>
+
+<span class="cm"># Preview no browser</span>
+<span class="cmd">Start-Process</span> <span class="str">"https://ohmyposh.dev/docs/themes"</span>
+
+<span class="cm"># Editar e trocar --config</span>
+<span class="cmd">notepad</span> <span class="var">$PROFILE</span>
+
+<span class="cm"># Recarregar</span>
+. <span class="var">$PROFILE</span></div></div>
+  </div>
+</section>
+
+<!-- ═══════ TROUBLESHOOTING ═══════ -->
+<section>
+  <div class="sh"><div class="si bg-red" style="color:var(--red)">&#x1F6A8;</div><h2>Troubleshooting</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th>Problema</th><th>Solu&ccedil;&atilde;o</th></tr></thead>
+    <tbody>
+      <tr><td class="c-red">CONFIG NOT FOUND</td><td>Seta <code>$env:POSH_THEMES_PATH</code> antes do oh-my-posh init no profile</td></tr>
+      <tr><td class="c-red">&Iacute;cones &#x25A1;&#x25A1;</td><td>Nerd Font n&atilde;o configurada &bull; <a href="https://www.nerdfonts.com/font-downloads" target="_blank">nerdfonts.com</a></td></tr>
+      <tr><td class="c-red">Ctrl+R sem efeito</td><td><code>winget install junegunn.fzf</code> e reinicia terminal</td></tr>
+      <tr><td class="c-red">Execution Policy</td><td><code>Set-ExecutionPolicy RemoteSigned -Scope CurrentUser</code></td></tr>
+      <tr><td class="c-red">Terminal lento</td><td><code>Measure-Command { . $PROFILE }</code> e comenta m&oacute;dulos</td></tr>
+      <tr><td class="c-red">z n&atilde;o funciona</td><td>ZLocation aprende com uso &mdash; navega por uns dias</td></tr>
+      <tr><td class="c-red">cmd n&atilde;o reconhecido</td><td>Fecha e abre o terminal depois do winget install</td></tr>
+      <tr><td class="c-red">.exe avulso n&atilde;o roda</td><td>Joga em <code>$env:LOCALAPPDATA\bin</code> e adiciona no PATH</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ═══════ PROFILE ═══════ -->
+<section>
+  <div class="sh"><div class="si bg-purple" style="color:var(--purple)">&#x1F4C4;</div><h2>Profile Completo</h2></div>
+  <p style="color:var(--comment);font-size:13.5px;margin-bottom:14px"><code style="color:var(--purple)">notepad $PROFILE</code> &mdash; cola tudo, salva, <code style="color:var(--purple)">. $PROFILE</code></p>
+  <div class="cb" style="font-size:11px;line-height:1.7">
+<span class="cm"># ═══════════════════════════════════════════════════════</span>
+<span class="cm">#  POWERSHELL PROFILE &mdash; fred's setup &mdash; dracula edition</span>
+<span class="cm"># ═══════════════════════════════════════════════════════</span>
+
+<span class="var">$env:POSH_THEMES_PATH</span> = <span class="str">"$env:LOCALAPPDATA\Programs\oh-my-posh\themes"</span>
+
+<span class="cm"># --- Oh My Posh ---</span>
+<span class="cmd">oh-my-posh</span> init pwsh <span class="fl">--config</span> <span class="str">"$env:POSH_THEMES_PATH\powerlevel10k_rainbow.omp.json"</span> | <span class="cmd">Invoke-Expression</span>
+
+<span class="cm"># --- PSReadLine ---</span>
+<span class="cmd">Import-Module</span> PSReadLine
+<span class="cmd">Set-PSReadLineKeyHandler</span> <span class="fl">-Key</span> Tab       <span class="fl">-Function</span> MenuComplete
+<span class="cmd">Set-PSReadLineOption</span>     <span class="fl">-PredictionSource</span> History
+<span class="cmd">Set-PSReadLineOption</span>     <span class="fl">-PredictionViewStyle</span> ListView
+<span class="cmd">Set-PSReadLineKeyHandler</span> <span class="fl">-Key</span> UpArrow   <span class="fl">-Function</span> HistorySearchBackward
+<span class="cmd">Set-PSReadLineKeyHandler</span> <span class="fl">-Key</span> DownArrow <span class="fl">-Function</span> HistorySearchForward
+<span class="cmd">Set-PSReadLineKeyHandler</span> <span class="fl">-Key</span> Ctrl+d    <span class="fl">-Function</span> DeleteCharOrExit
+<span class="cmd">Set-PSReadLineKeyHandler</span> <span class="fl">-Key</span> Ctrl+l    <span class="fl">-Function</span> ClearScreen
+
+<span class="cm"># --- Dracula Syntax Colors ---</span>
+<span class="cmd">Set-PSReadLineOption</span> <span class="fl">-Colors</span> @{
+    Command=<span class="str">'#50fa7b'</span>;Parameter=<span class="str">'#ffb86c'</span>;Operator=<span class="str">'#ff79c6'</span>;Variable=<span class="str">'#bd93f9'</span>
+    String=<span class="str">'#f1fa8c'</span>;Number=<span class="str">'#bd93f9'</span>;Type=<span class="str">'#8be9fd'</span>;Comment=<span class="str">'#6272a4'</span>
+    Keyword=<span class="str">'#ff79c6'</span>;Error=<span class="str">'#ff5555'</span>;Member=<span class="str">'#8be9fd'</span>
+    InlinePrediction=<span class="str">'#6272a4'</span>;ListPrediction=<span class="str">'#bd93f9'</span>;Selection=<span class="str">'#44475a'</span>
+}
+
+<span class="cm"># --- PSFzf ---</span>
+<span class="cmd">Import-Module</span> PSFzf
+<span class="cmd">Set-PsFzfOption</span> <span class="fl">-PSReadlineChordProvider</span> <span class="str">'Ctrl+t'</span>
+<span class="cmd">Set-PsFzfOption</span> <span class="fl">-PSReadlineChordReverseHistory</span> <span class="str">'Ctrl+r'</span>
+
+<span class="cm"># --- Modules ---</span>
+<span class="cmd">Import-Module</span> Terminal-Icons
+<span class="cmd">Import-Module</span> posh-git
+<span class="kw">if</span> (Get-Module -ListAvailable ZLocation) { <span class="cmd">Import-Module</span> ZLocation }
+
+<span class="cm"># ═══════════════════════════════════════════════════════</span>
+<span class="cm">#  ALIASES</span>
+<span class="cm"># ═══════════════════════════════════════════════════════</span>
+
+<span class="cm"># Navega&ccedil;&atilde;o (eza se dispon&iacute;vel, sen&atilde;o fallback)</span>
+<span class="kw">if</span> (Get-Command eza -ErrorAction SilentlyContinue) {
+    <span class="kw">function</span> <span class="cmd">ll</span> { eza -la --icons --git @args }
+    <span class="kw">function</span> <span class="cmd">la</span> { eza -a --icons @args }
+    <span class="kw">function</span> <span class="cmd">lt</span> { eza --tree --icons --level=2 @args }
+} <span class="kw">else</span> {
+    <span class="kw">function</span> <span class="cmd">ll</span> { Get-ChildItem -Force @args }
+    <span class="kw">function</span> <span class="cmd">la</span> { Get-ChildItem -Force -Hidden @args }
+}
+<span class="kw">function</span> <span class="cmd">..</span>   { Set-Location .. }
+<span class="kw">function</span> <span class="cmd">...</span>  { Set-Location ../.. }
+<span class="kw">function</span> <span class="cmd">~</span>    { Set-Location $HOME }
+<span class="kw">function</span> <span class="cmd">mkcd</span> { <span class="kw">param</span>($dir) New-Item -ItemType Directory -Path $dir -Force; Set-Location $dir }
+
+<span class="cm"># bat como cat (se instalado)</span>
+<span class="kw">if</span> (Get-Command bat -ErrorAction SilentlyContinue) { <span class="kw">function</span> <span class="cmd">cat</span> { bat @args } }
+
+<span class="cm"># duf como df (se instalado)</span>
+<span class="kw">if</span> (Get-Command duf -ErrorAction SilentlyContinue) { <span class="kw">function</span> <span class="cmd">df</span> { duf @args } }
+<span class="kw">else</span> { <span class="kw">function</span> <span class="cmd">df</span> { Get-PSDrive -PSProvider FileSystem } }
+
+<span class="cm"># Git</span>
+<span class="kw">function</span> <span class="cmd">gst</span>  { git status }
+<span class="kw">function</span> <span class="cmd">ga</span>   { git add @args }
+<span class="kw">function</span> <span class="cmd">gaa</span>  { git add --all }
+<span class="kw">function</span> <span class="cmd">gc</span>   { git commit -m @args }
+<span class="kw">function</span> <span class="cmd">gp</span>   { git push @args }
+<span class="kw">function</span> <span class="cmd">gl</span>   { git pull @args }
+<span class="kw">function</span> <span class="cmd">glog</span> { git log --oneline --graph --decorate -20 }
+<span class="kw">function</span> <span class="cmd">gd</span>   { git diff @args }
+<span class="kw">function</span> <span class="cmd">gb</span>   { git branch @args }
+<span class="kw">function</span> <span class="cmd">gco</span>  { git checkout @args }
+
+<span class="cm"># Arquivos</span>
+<span class="kw">function</span> <span class="cmd">touch</span> { <span class="kw">param</span>($file) <span class="kw">if</span> (Test-Path $file) { (Get-Item $file).LastWriteTime = Get-Date } <span class="kw">else</span> { New-Item $file -ItemType File } }
+<span class="kw">function</span> <span class="cmd">head</span>  { <span class="kw">param</span>($file, $n=10) Get-Content $file -TotalCount $n }
+<span class="kw">function</span> <span class="cmd">tail</span>  { <span class="kw">param</span>($file, $n=10) Get-Content $file -Tail $n }
+<span class="kw">function</span> <span class="cmd">which</span> { Get-Command @args | Select-Object -ExpandProperty Source }
+<span class="kw">function</span> <span class="cmd">grep</span>  { Select-String @args }
+
+<span class="cm"># Extract (equivalente do plugin extract do Zsh)</span>
+<span class="kw">function</span> <span class="cmd">extract</span> {
+    <span class="kw">param</span>([string]$file)
+    <span class="kw">if</span> (-not (Test-Path $file)) { Write-Host <span class="str">"N&atilde;o encontrado: $file"</span> -ForegroundColor Red; <span class="kw">return</span> }
+    <span class="kw">switch</span> -Regex ($file) {
+        <span class="str">'\.zip$'</span>             { Expand-Archive $file -DestinationPath (Split-Path $file) }
+        <span class="str">'\.tar\.gz$|\.tgz$'</span>  { tar -xzf $file }
+        <span class="str">'\.tar\.bz2$'</span>        { tar -xjf $file }
+        <span class="str">'\.tar$'</span>             { tar -xf $file }
+        <span class="str">'\.gz$'</span>              { gzip -d $file }
+        <span class="str">'\.7z$'</span>              { 7z x $file }
+        <span class="str">'\.rar$'</span>             { unrar x $file }
+        default              { Write-Host <span class="str">"Formato desconhecido"</span> -ForegroundColor Yellow }
+    }
+}
+
+<span class="cm"># Sistema / Rede</span>
+<span class="kw">function</span> <span class="cmd">myip</span>  { Invoke-RestMethod <span class="str">"https://api.ipify.org"</span> }
+<span class="kw">function</span> <span class="cmd">ports</span> { netstat -ano | Select-String <span class="str">"LISTENING"</span> }
+
+<span class="cm"># Clipboard (equivalente copypath / copyfile do Zsh)</span>
+<span class="kw">function</span> <span class="cmd">copypath</span> { (Get-Location).Path | Set-Clipboard; Write-Host <span class="str">"Copiado!"</span> -ForegroundColor Green }
+<span class="kw">function</span> <span class="cmd">copyfile</span> { <span class="kw">param</span>($file) Get-Content $file -Raw | Set-Clipboard; Write-Host <span class="str">"Conte&uacute;do copiado!"</span> -ForegroundColor Green }
+
+<span class="cm"># Web search (equivalente web-search do Zsh)</span>
+<span class="kw">function</span> <span class="cmd">google</span> { <span class="kw">param</span>([string]$q) Start-Process <span class="str">"https://www.google.com/search?q=$([uri]::EscapeDataString($q))"</span> }
+<span class="kw">function</span> <span class="cmd">ddg</span>    { <span class="kw">param</span>([string]$q) Start-Process <span class="str">"https://duckduckgo.com/?q=$([uri]::EscapeDataString($q))"</span> }
+
+<span class="cm"># Open (equivalente xdg-open / open do macOS)</span>
+<span class="kw">function</span> <span class="cmd">open</span> { <span class="kw">param</span>($path=<span class="str">"."</span>) Start-Process $path }
+
+<span class="cm"># Boas-vindas</span>
+<span class="cmd">Write-Host</span> <span class="str">"PowerShell $($PSVersionTable.PSVersion) | $(oh-my-posh version)"</span> <span class="fl">-ForegroundColor</span> DarkGray</div>
+</section>
+
+<!-- ═══════ LINKS ═══════ -->
+<section>
+  <div class="sh"><div class="si bg-pink" style="color:var(--pink)">&#x1F517;</div><h2>Links &Uacute;teis</h2></div>
+  <div class="grid g2">
+    <div class="card"><div class="cl c-purple">Refer&ecirc;ncia</div>
+      <div class="row"><span class="rk c-purple">Oh My Posh</span><span class="rv"><a href="https://ohmyposh.dev/" target="_blank">ohmyposh.dev</a> &bull; <a href="https://ohmyposh.dev/docs/themes" target="_blank">Temas</a></span></div>
+      <div class="row"><span class="rk c-purple">Nerd Fonts</span><span class="rv"><a href="https://www.nerdfonts.com/font-downloads" target="_blank">nerdfonts.com</a></span></div>
+      <div class="row"><span class="rk c-purple">Dracula</span><span class="rv"><a href="https://draculatheme.com/windows-terminal" target="_blank">Windows Terminal</a> &bull; <a href="https://draculatheme.com/" target="_blank">Site</a></span></div>
+      <div class="row"><span class="rk c-purple">Oh My Zsh</span><span class="rv"><a href="https://github.com/ohmyzsh/ohmyzsh/wiki/Plugins" target="_blank">Plugins</a> &bull; <a href="https://github.com/ohmyzsh/ohmyzsh/wiki/Themes" target="_blank">Temas</a></span></div>
+    </div>
+    <div class="card"><div class="cl c-cyan">CLI Modernas</div>
+      <div class="row"><span class="rk c-cyan">bat</span><span class="rv"><a href="https://github.com/sharkdp/bat" target="_blank">sharkdp/bat</a></span></div>
+      <div class="row"><span class="rk c-cyan">eza</span><span class="rv"><a href="https://github.com/eza-community/eza" target="_blank">eza-community/eza</a></span></div>
+      <div class="row"><span class="rk c-cyan">ripgrep</span><span class="rv"><a href="https://github.com/BurntSushi/ripgrep" target="_blank">BurntSushi/ripgrep</a></span></div>
+      <div class="row"><span class="rk c-cyan">fd</span><span class="rv"><a href="https://github.com/sharkdp/fd" target="_blank">sharkdp/fd</a></span></div>
+      <div class="row"><span class="rk c-cyan">jq</span><span class="rv"><a href="https://jqlang.github.io/jq/" target="_blank">jqlang.github.io</a></span></div>
+      <div class="row"><span class="rk c-cyan">tldr</span><span class="rv"><a href="https://github.com/tldr-pages/tlrc" target="_blank">tldr-pages/tlrc</a></span></div>
+    </div>
+    <div class="card"><div class="cl c-orange">Infra &amp; Database</div>
+      <div class="row"><span class="rk c-orange">pgcli</span><span class="rv"><a href="https://github.com/dbcli/pgcli" target="_blank">dbcli/pgcli</a></span></div>
+      <div class="row"><span class="rk c-orange">usql</span><span class="rv"><a href="https://github.com/xo/usql" target="_blank">xo/usql</a></span></div>
+      <div class="row"><span class="rk c-orange">nmap</span><span class="rv"><a href="https://nmap.org/" target="_blank">nmap.org</a></span></div>
+      <div class="row"><span class="rk c-orange">WinMTR</span><span class="rv"><a href="https://github.com/White-Tiger/WinMTR" target="_blank">White-Tiger/WinMTR</a></span></div>
+      <div class="row"><span class="rk c-orange">doggo</span><span class="rv"><a href="https://github.com/mr-karan/doggo" target="_blank">mr-karan/doggo</a></span></div>
+      <div class="row"><span class="rk c-orange">gping</span><span class="rv"><a href="https://github.com/orf/gping" target="_blank">orf/gping</a></span></div>
+    </div>
+    <div class="card"><div class="cl c-pink">Produtividade</div>
+      <div class="row"><span class="rk c-pink">lazygit</span><span class="rv"><a href="https://github.com/jesseduffield/lazygit" target="_blank">jesseduffield/lazygit</a></span></div>
+      <div class="row"><span class="rk c-pink">btop</span><span class="rv"><a href="https://github.com/aristocratos/btop" target="_blank">aristocratos/btop</a></span></div>
+      <div class="row"><span class="rk c-pink">duf</span><span class="rv"><a href="https://github.com/muesli/duf" target="_blank">muesli/duf</a></span></div>
+      <div class="row"><span class="rk c-pink">tokei</span><span class="rv"><a href="https://github.com/XAMPPRocky/tokei" target="_blank">XAMPPRocky/tokei</a></span></div>
+      <div class="row"><span class="rk c-pink">hyperfine</span><span class="rv"><a href="https://github.com/sharkdp/hyperfine" target="_blank">sharkdp/hyperfine</a></span></div>
+      <div class="row"><span class="rk c-pink">gsudo</span><span class="rv"><a href="https://github.com/gerardog/gsudo" target="_blank">gerardog/gsudo</a></span></div>
+      <div class="row"><span class="rk c-pink">ZLocation</span><span class="rv"><a href="https://github.com/vors/ZLocation" target="_blank">vors/ZLocation</a></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ INSTALL RÁPIDO ═══════ -->
+<section>
+  <div class="sh"><div class="si bg-green" style="color:var(--green)">&#x1F4CB;</div><h2>Instala&ccedil;&atilde;o R&aacute;pida &mdash; Tudo de Uma Vez</h2></div>
+  <p class="sd">Copia e cola num PowerShell admin pra instalar tudo do zero</p>
+  <div class="cb" style="font-size:11px">
+<span class="cm"># PowerShell 7 + Windows Terminal</span>
+<span class="cmd">winget</span> install Microsoft.PowerShell
+<span class="cmd">winget</span> install Microsoft.WindowsTerminal
+
+<span class="cm"># Oh My Posh + Nerd Font</span>
+<span class="cmd">winget</span> install JanDeDobbeleer.OhMyPosh
+<span class="cmd">oh-my-posh</span> font install JetBrainsMono
+
+<span class="cm"># M&oacute;dulos PowerShell</span>
+<span class="cmd">Install-Module</span> <span class="fl">-Name</span> PSReadLine     <span class="fl">-Force</span> <span class="fl">-SkipPublisherCheck</span>
+<span class="cmd">Install-Module</span> <span class="fl">-Name</span> PSFzf          <span class="fl">-Force</span>
+<span class="cmd">Install-Module</span> <span class="fl">-Name</span> Terminal-Icons  <span class="fl">-Force</span>
+<span class="cmd">Install-Module</span> <span class="fl">-Name</span> posh-git       <span class="fl">-Force</span>
+<span class="cmd">Install-Module</span> <span class="fl">-Name</span> ZLocation      <span class="fl">-Force</span>
+
+<span class="cm"># CLI Modernas</span>
+<span class="cmd">winget</span> install junegunn.fzf
+<span class="cmd">winget</span> install sharkdp.bat
+<span class="cmd">winget</span> install sharkdp.fd
+<span class="cmd">winget</span> install sharkdp.hyperfine
+<span class="cmd">winget</span> install BurntSushi.ripgrep
+<span class="cmd">winget</span> install eza-community.eza
+<span class="cmd">winget</span> install jqlang.jq
+<span class="cmd">winget</span> install so-fancy.diff-so-fancy
+<span class="cmd">winget</span> install tldr-pages.tlrc
+<span class="cmd">winget</span> install XAMPPRocky.tokei
+
+<span class="cm"># Produtividade</span>
+<span class="cmd">winget</span> install JesseDuffield.lazygit
+<span class="cmd">winget</span> install aristocratos.btop4win
+<span class="cmd">winget</span> install muesli.duf
+<span class="cmd">winget</span> install orf.gping
+<span class="cmd">winget</span> install gerardog.gsudo
+<span class="cmd">winget</span> install mr-karan.doggo
+
+<span class="cm"># Infra / Database</span>
+<span class="cmd">winget</span> install Insecure.Nmap
+<span class="cmd">pip</span> install pgcli usql
+
+<span class="cm"># .exe avulsos (WinMTR) &mdash; pasta bin no PATH</span>
+<span class="cmd">New-Item</span> <span class="fl">-ItemType</span> Directory <span class="fl">-Path</span> <span class="str">"$env:LOCALAPPDATA\bin"</span> <span class="fl">-Force</span>
+[Environment]::SetEnvironmentVariable(<span class="str">"Path"</span>, <span class="str">"$env:LOCALAPPDATA\bin;"</span> + [Environment]::GetEnvironmentVariable(<span class="str">"Path"</span>, <span class="str">"User"</span>), <span class="str">"User"</span>)</div>
+</section>
+
+<footer>powershell turbinado &mdash; <span>fred's setup</span> &mdash; 2026 &mdash; dracula edition &mdash; 30+ ferramentas</footer>
+</div>
+</body>
+</html>

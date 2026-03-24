@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PowerShell Turbinado — Guia de Instalação</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#282a36;--current:#44475a;--surface:#2d2f3d;--surface2:#353849;--border:#44475a;--fg:#f8f8f2;--text:#e2e2dc;--text-dim:#8690b3;--comment:#6272a4;--cyan:#8be9fd;--green:#50fa7b;--orange:#ffb86c;--pink:#ff79c6;--purple:#bd93f9;--red:#ff5555;--yellow:#f1fa8c;--mono:'JetBrains Mono',monospace;--sans:'Outfit',system-ui,sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.7}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(189,147,249,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(189,147,249,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+.container{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:48px 24px 80px}
+a{color:var(--purple);text-decoration:none;border-bottom:1px solid rgba(189,147,249,.3);transition:border-color .2s,color .2s}a:hover{color:var(--pink);border-color:var(--pink)}
+code{font-family:var(--mono);font-size:.88em;color:var(--cyan);background:rgba(139,233,253,.08);padding:1px 6px;border-radius:3px}
+p{margin-bottom:12px}
+strong{color:var(--fg);font-weight:600}
+
+header{text-align:center;margin-bottom:64px}
+.vb{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--purple);background:rgba(189,147,249,.1);border:1px solid rgba(189,147,249,.25);padding:6px 16px;border-radius:20px;margin-bottom:20px}
+.vb .dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:800;letter-spacing:-1.5px;color:var(--fg);margin-bottom:10px}
+h1 .hl{color:var(--purple)}h1 .hl2{color:var(--pink)}
+.subtitle{color:var(--comment);font-size:1.05rem;max-width:560px;margin:0 auto}
+.hd{width:80px;height:3px;margin:28px auto 0;border-radius:3px;background:linear-gradient(90deg,var(--purple),var(--pink),var(--cyan))}
+
+/* Phase headers */
+.phase{margin:48px 0 20px;display:flex;align-items:center;gap:14px}
+.phase-num{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:18px;font-weight:700;flex-shrink:0;border:1px solid}
+.phase-info h2{font-size:1.35rem;font-weight:700;color:var(--fg);letter-spacing:-.3px}
+.phase-info p{font-size:13.5px;color:var(--comment);margin:0}
+
+/* Steps (accordion) */
+details{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;transition:border-color .3s,box-shadow .3s}
+details:hover{border-color:rgba(189,147,249,.25)}
+details[open]{border-color:rgba(189,147,249,.35);box-shadow:0 4px 20px rgba(189,147,249,.06)}
+
+summary{padding:16px 20px;cursor:pointer;display:flex;align-items:center;gap:14px;list-style:none;user-select:none;font-weight:600;font-size:15px;color:var(--fg);transition:color .2s}
+summary::-webkit-details-marker{display:none}
+summary::marker{display:none}
+summary:hover{color:var(--purple)}
+
+.step-num{font-family:var(--mono);font-size:11px;font-weight:700;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+.step-arrow{margin-left:auto;font-size:18px;color:var(--comment);transition:transform .3s}
+details[open] .step-arrow{transform:rotate(90deg);color:var(--purple)}
+
+.step-body{padding:0 20px 20px;border-top:1px solid rgba(68,71,90,.5)}
+.step-body p{margin-top:12px;font-size:14px;color:var(--text-dim)}
+.step-body p:first-child{margin-top:16px}
+
+/* Command blocks */
+.cmd-block{background:#21222c;border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin:12px 0;font-family:var(--mono);font-size:12.5px;line-height:1.8;overflow-x:auto;white-space:pre;position:relative}
+.cmd-block .cm{color:var(--comment)}.cmd-block .c{color:var(--green)}.cmd-block .f{color:var(--orange)}.cmd-block .s{color:var(--yellow)}.cmd-block .v{color:var(--purple)}.cmd-block .k{color:var(--pink)}
+
+/* Prompt indicator */
+.prompt{color:var(--comment);user-select:none}
+
+/* Info/warn/success boxes */
+.info-box{border-radius:10px;padding:12px 16px;margin:12px 0;font-size:13.5px;display:flex;align-items:flex-start;gap:10px}
+.info-box.info{background:rgba(139,233,253,.06);border:1px solid rgba(139,233,253,.2);color:var(--cyan)}
+.info-box.warn{background:rgba(241,250,140,.06);border:1px solid rgba(241,250,140,.2);color:var(--yellow)}
+.info-box.success{background:rgba(80,250,123,.06);border:1px solid rgba(80,250,123,.2);color:var(--green)}
+.info-box.danger{background:rgba(255,85,85,.06);border:1px solid rgba(255,85,85,.2);color:var(--red)}
+.info-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+
+/* Check list */
+.checklist{margin:12px 0;padding:0;list-style:none}
+.checklist li{padding:6px 0;font-size:14px;color:var(--text-dim);display:flex;align-items:center;gap:8px}
+.checklist li::before{content:'';width:18px;height:18px;border-radius:5px;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+
+/* Large code profile block */
+.profile-block{background:#21222c;border:1px solid var(--border);border-radius:12px;padding:20px 22px;font-family:var(--mono);font-size:11px;line-height:1.7;overflow-x:auto;white-space:pre;margin:16px 0;max-height:600px;overflow-y:auto}
+
+/* Link pill */
+.link-pill{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:11px;font-weight:600;padding:3px 10px;border-radius:6px;background:rgba(189,147,249,.1);border:1px solid rgba(189,147,249,.2);color:var(--purple);margin:2px 4px 2px 0;border-bottom:none}
+.link-pill:hover{background:rgba(255,121,198,.1);color:var(--pink);border-color:rgba(255,121,198,.2)}
+
+.c-purple{color:var(--purple)}.c-pink{color:var(--pink)}.c-green{color:var(--green)}.c-cyan{color:var(--cyan)}.c-orange{color:var(--orange)}.c-yellow{color:var(--yellow)}.c-red{color:var(--red)}
+.bg-purple{background:rgba(189,147,249,.15);border-color:rgba(189,147,249,.3)}.bg-pink{background:rgba(255,121,198,.15);border-color:rgba(255,121,198,.3)}.bg-green{background:rgba(80,250,123,.15);border-color:rgba(80,250,123,.3)}.bg-cyan{background:rgba(139,233,253,.15);border-color:rgba(139,233,253,.3)}.bg-orange{background:rgba(255,184,108,.15);border-color:rgba(255,184,108,.3)}.bg-yellow{background:rgba(241,250,140,.15);border-color:rgba(241,250,140,.3)}
+
+footer{text-align:center;margin-top:64px;padding-top:24px;border-top:1px solid var(--border);color:var(--comment);font-size:12px;font-family:var(--mono);letter-spacing:.5px}footer span{color:var(--purple)}
+
+@media(max-width:640px){.cmd-block,.profile-block{font-size:11px;padding:12px 14px}summary{font-size:14px;padding:14px 16px}.step-body{padding:0 16px 16px}}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="vb"><span class="dot"></span> guia passo a passo</div>
+  <h1>Setup <span class="hl">Completo</span> do <span class="hl2">Zero</span></h1>
+  <p class="subtitle">Do Windows pelado ao terminal turbinado. Segue a ordem, n&atilde;o pula etapa.</p>
+  <div class="hd"></div>
+</header>
+
+<!-- ╔══════════════════════════════════════╗ -->
+<!-- ║  FASE 1: BASE                        ║ -->
+<!-- ╚══════════════════════════════════════╝ -->
+<div class="phase">
+  <div class="phase-num bg-purple c-purple">01</div>
+  <div class="phase-info"><h2>Base &mdash; PowerShell 7 + Terminal</h2><p>Substitui o PowerShell 5.1 jur&aacute;ssico que vem no Windows</p></div>
+</div>
+
+<details>
+  <summary><span class="step-num bg-purple c-purple">1.1</span> Instalar o PowerShell 7<span class="step-arrow">&#x25B6;</span></summary>
+  <div class="step-body">
+    <p>O PowerShell que vem no Windows (5.1) &eacute; antigo e limitado. O 7+ &eacute; cross-platform, mais r&aacute;pido e compatível com tudo que vamos instalar.</p>
+    <div class="cmd-block"><span class="prompt">&#10095; </span><span class="c">winget</span> install Microsoft.PowerShell</div>
+    <div class="info-box info"><span class="info-icon">&#x2139;</span>Depois de instalar, voc&ecirc; ter&aacute; <strong>dois</strong> PowerShells: &quot;Windows PowerShell&quot; (5.1, antigo) e &quot;PowerShell&quot; (7+, novo). Sempre use o novo.</div>
+    <p><strong>Verificar:</strong></p>
+    <div class="cmd-block"><span class="prompt">&#10095; </span><span class="c">$PSVersionTable</span>.PSVersion</div>
+    <p>Tem que retornar <code>7.x.x</code>.</p>
+    <a class="link-pill" href="https://github.com/PowerShell/PowerShell" target="_blank">&#x1F517; GitHub</a>
+  </div>
+</details>
+
+<details>
+  <summary><span class="step-num bg-purple c-purple">1.2</span> Instalar o Windows Terminal<span class="step-arrow">&#x25B6;</span></summary>
+  <div class="step-body">
+    <p>Terminal moderno da Microsoft com abas, split panes, GPU rendering e suporte a fontes Nerd Font.</p>
+    <div class="cmd-block"><span class="prompt">&#10095; </span><span class="c">winget</span> install Microsoft.WindowsTerminal</div>
+    <div class="info-box warn"><span class="info-icon">&#x26A0;</span>Se j&aacute; veio instalado no seu Windows 11, pule este passo.</div>
+    <a class="link-pill" href="https://github.com/microsoft/terminal" target="_blank">&#x1F517; GitHub</a>
+  </div>
+</details>
+
+<details>
+  <summary><span class="step-num bg-purple c-purple">1.3</span> Mudar perfil padr&atilde;o para PowerShell 7<span class="step-arrow">&#x25B6;</span></summary>
+  <div class="step-body">
+    <p>Faz o Windows Terminal abrir o PowerShell 7 por padr&atilde;o em vez do 5.1.</p>
+    <ul class="checklist">
+      <li>Abre o Windows Terminal</li>
+      <li><code>Ctrl+,</code> &rarr; Settings</li>
+      <li><strong>Startup &rarr; Default profile</strong> &rarr; seleciona <strong>&quot;PowerShell&quot;</strong> (o novo, n&atilde;o &quot;Windows PowerShell&quot;)</li>
+      <li>Salva</li>
+    </ul>
+  </div>
+</details>
+
+<details>
+  <summary><span class="step-num bg-purple c-purple">1.4</span> Liberar Execution Policy<span class="step-arrow">&#x25B6;</span></summary>
+  <div class="step-body">
+    <p>Permite que o PowerShell execute scripts (necess&aacute;rio pro profile e m&oacute;dulos).</p>
+    <div class="cmd-block"><span class="prompt">&#10095; </span><span class="c">Set-ExecutionPolicy</span> RemoteSigned <span class="f">-Scope</span> CurrentUser</div>
+    <div class="info-box info"><span class="info-icon">&#x2139;</span>S&oacute; precisa fazer isso uma vez. <code>RemoteSigned</code> &eacute; seguro: permite scripts locais e exige assinatura em scripts baixados.</div>
+  </div>
+</details>
+
+<!-- ╔══════════════════════════════════════╗ -->
+<!-- ║  FASE 2: VISUAL                      ║ -->
+<!-- ╚══════════════════════════════════════╝ -->
+<div class="phase">
+  <div class="phase-num bg-pink c-pink">02</div>
+  <div class="phase-info"><h2>Visual &mdash; Fonte, Tema e Prompt</h2><p>Deixa o terminal bonito antes de configurar funcionalidades</p></div>
+</div>
+
+<details>
+  <summary><span class="step-num bg-pink c-pink">2.1</span> Instalar Nerd Font<span class="step-arrow">&#x25B6;</span></summary>
+  <div class="step-body">
+    <p>Sem Nerd Font, os &iacute;cones do Oh My Posh e do Terminal-Icons aparecem como quadradinhos &#x25A1;&#x25A1;&#x25A1;.</p>
+    <div class="cmd-block"><span class="cm"># Instala via Oh My Posh (mais f&aacute;cil)</span>
+<span class="prompt">&#10095; </span><span class="c">oh-my-posh</span> font install JetBrainsMono</div>
+    <div class="info-box warn"><span class="info-icon">&#x26A0;</span>Se o Oh My Posh ainda n&atilde;o tiver instalado (pr&oacute;ximo passo), baixe manualmente em <a href="https://www.nerdfonts.com/font-downloads" target="_blank">nerdfonts.com</a>. Recomendo <strong>JetBrains Mono Nerd Font</strong> ou <strong>FiraCode Nerd Font</strong>.</div>
+    <p><strong>Configurar no Windows Terminal:</strong></p>
+    <ul class="checklist">
+      <li><code>Ctrl+,</code> &rarr; Settings</li>
+      <li><strong>Profiles &rarr; Defaults &rarr; Appearance &rarr; Font face</strong></li>
+      <li>Seleciona <strong>JetBrainsMono Nerd Font</strong></li>
+      <li>Salva</li>
+    </ul>
+    <a class="link-pill" href="https://www.nerdfonts.com/font-downloads" target="_blank">&#x1F517; Nerd Fonts</a>
+  </div>
+</details>
+
+<details>
+  <summary><span class="step-num bg-pink c-pink">2.2</span> Instalar Oh My Posh<span class="step-arrow">&#x25B6;</span></summary>
+  <div class="step-body">
+    <p>Theme engine que transforma o prompt com informa&ccedil;&otilde;es de git, tempo de execu&ccedil;&atilde;o, erros, segmentos coloridos.</p>
+    <div class="cmd-block"><span class="prompt">&#10095; </span><span class="c">winget</span> install JanDeDobbeleer.OhMyPosh</div>
+    <p><strong>Fecha e abre o terminal</strong> pra ele reconhecer o <code>oh-my-posh</code> no PATH.</p>
+    <p><strong>Verificar:</strong></p>
+    <div class="cmd-block"><span class="prompt">&#10095; </span><span class="c">oh-my-posh</span> version</div>
+    <a class="link-pill" href="https://ohmyposh.dev/" target="_blank">&#x1F517; ohmyposh.dev</a>
+    <a class="link-pill" href="https://ohmyposh.dev/docs/themes" target="_blank">&#x1F3A8; Temas</a>
+  </div>
+</details>
+
+<details>
+  <summary><span class="step-num bg-pink c-pink">2.3</span> Baixar os temas do Oh My Posh<span class="step-arrow">&#x25B6;</span></summary>
+  <div class="step-body">
+    <p>Se instalou via <strong>Microsoft Store</strong> (ou os temas n&atilde;o vieram), precisa baixar separado.</p>
+    <div class="cmd-block"><span class="cm"># Cria a pasta de temas</span>
+<span class="prompt">&#10095; </span><span class="c">New-Item</span> <span class="f">-Path</span> <span class="s">"$env:LOCALAPPDATA\Programs\oh-my-posh\themes"</span> <span class="f">-ItemType</span> Directory <span class="f">-Force</span>
+
+<span class="cm"># Baixa todos os temas</span>
+<span class="prompt">&#10095; </span><span class="c">Invoke-WebRequest</span> <span class="f">-Uri</span> <span class="s">"https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/themes.zip"</span> <span class="f">-OutFile</span> <span class="s">"$env:TEMP\omp-themes.zip"</span>
+
+<span class="cm"># Extrai</span>
+<span class="prompt">&#10095; </span><span class="c">Expand-Archive</span> <span class="f">-Path</span> <span class="s">"$env:TEMP\omp-themes.zip"</span> <span class="f">-DestinationPath</span> <span class="s">"$env:LOCALAPPDATA\Programs\oh-my-posh\themes"</span> <span class="f">-Force</span>
+
+<span class="cm"># Confirma (deve retornar 80+)</span>
+<span class="prompt">&#10095; </span>(Get-ChildItem <span class="s">"$env:LOCALAPPDATA\Programs\oh-my-posh\themes"</span> <span class="f">-Filter</span> <span class="s">"*.omp.json"</span>).Count</div>
+    <div class="info-box info"><span class="info-icon">&#x2139;</span>Se instalou via <code>winget</code> e os temas j&aacute; est&atilde;o l&aacute;, pule este passo. Teste com <code>$env:POSH_THEMES_PATH</code> &mdash; se retornar um caminho com arquivos, t&aacute; ok.</div>
+  </div>
+</details>
+
+<!-- ╔══════════════════════════════════════╗ -->
+<!-- ║  FASE 3: MÓDULOS                     ║ -->
+<!-- ╚══════════════════════════════════════╝ -->
+<div class="phase">
+  <div class="phase-num bg-green c-green">03</div>
+  <div class="phase-info"><h2>M&oacute;dulos PowerShell</h2><p>Completação, fuzzy finder, &iacute;cones e git integration</p></div>
+</div>
+
+<details>
+  <summary><span class="step-num bg-green c-green">3.1</span> Instalar fzf (depend&ecirc;ncia do PSFzf)<span class="step-arrow">&#x25B6;</span></summary>
+  <div class="step-body">
+    <p>Bin&aacute;rio do fuzzy finder. Sem ele, o m&oacute;dulo PSFzf n&atilde;o funciona.</p>
+    <div class="cmd-block"><span class="prompt">&#10095; </span><span class="c">winget</span> install junegunn.fzf</div>
+    <p><strong>Fecha e abre o terminal.</strong> Verifica:</p>
+    <div class="cmd-block"><span class="prompt">&#10095; </span><span class="c">fzf</span> --version</div>
+    <a class="link-pill" href="https://github.com/junegunn/fzf" target="_blank">&#x1F517; GitHub</a>
+  </div>
+</details>
+
+<details>
+  <summary><span class="step-num bg-green c-green">3.2</span> Instalar m&oacute;dulos do PowerShell<span class="step-arrow">&#x25B6;</span></summary>
+  <div class="step-body">
+    <p>Roda tudo de uma vez:</p>
+    <div class="cmd-block"><span class="prompt">&#10095; </span><span class="c">Install-Module</span> <span class="f">-Name</span> PSReadLine     <span class="f">-Force</span> <span class="f">-SkipPublisherCheck</span>
+<span class="prompt">&#10095; </span><span class="c">Install-Module</span> <span class="f">-Name</span> PSFzf          <span class="f">-Force</span>
+<span class="prompt">&#10095; </span><span class="c">Install-Module</span> <span class="f">-Name</span> Terminal-Icons  <span class="f">-Force</span>
+<span class="prompt">&#10095; </span><span class="c">Install-Module</span> <span class="f">-Name</span> posh-git       <span class="f">-Force</span>
+<span class="prompt">&#10095; </span><span class="c">Install-Module</span> <span class="f">-Name</span> ZLocation      <span class="f">-Force</span></div>
+    <div class="info-box info"><span class="info-icon">&#x2139;</span>Se pedir confirma&ccedil;&atilde;o de reposit&oacute;rio n&atilde;o confi&aacute;vel (PSGallery), digita <code>Y</code>.</div>
+    <p><strong>O que cada um faz:</strong></p>
+    <ul class="checklist">
+      <li><strong>PSReadLine</strong> &mdash; completa&ccedil;&atilde;o Tab, hist&oacute;rico preditivo, syntax highlighting</li>
+      <li><strong>PSFzf</strong> &mdash; Ctrl+R (hist&oacute;rico fuzzy), Ctrl+T (busca arquivos)</li>
+      <li><strong>Terminal-Icons</strong> &mdash; &iacute;cones coloridos nos arquivos</li>
+      <li><strong>posh-git</strong> &mdash; branch no prompt + tab completion de branches</li>
+      <li><strong>ZLocation</strong> &mdash; pula pra diret&oacute;rios frequentes com <code>z nome</code></li>
+    </ul>
+    <a class="link-pill" href="https://github.com/PowerShell/PSReadLine" target="_blank">PSReadLine</a>
+    <a class="link-pill" href="https://github.com/kelleyma49/PSFzf" target="_blank">PSFzf</a>
+    <a class="link-pill" href="https://github.com/devblackops/Terminal-Icons" target="_blank">Terminal-Icons</a>
+    <a class="link-pill" href="https://github.com/dahlbyk/posh-git" target="_blank">posh-git</a>
+    <a class="link-pill" href="https://github.com/vors/ZLocation" target="_blank">ZLocation</a>
+  </div>
+</details>
+
+<!-- ╔══════════════════════════════════════╗ -->
+<!-- ║  FASE 4: CLI TOOLS                   ║ -->
+<!-- ╚══════════════════════════════════════╝ -->
+<div class="phase">
+  <div class="phase-num bg-cyan c-cyan">04</div>
+  <div class="phase-info"><h2>Ferramentas CLI Modernas</h2><p>Substituem comandos antigos por vers&otilde;es mais r&aacute;pidas e bonitas</p></div>
+</div>
+
+<details>
+  <summary><span class="step-num bg-cyan c-cyan">4.1</span> CLI modernas via winget<span class="step-arrow">&#x25B6;</span></summary>
+  <div class="step-body">
+    <p>Roda tudo de uma vez:</p>
+    <div class="cmd-block"><span class="cm"># Substitui cat</span>
+<span class="prompt">&#10095; </span><span class="c">winget</span> install sharkdp.bat
+
+<span class="cm"># Substitui ls</span>
+<span class="prompt">&#10095; </span><span class="c">winget</span> install eza-community.eza
+
+<span class="cm"># Substitui grep (10x mais r&aacute;pido)</span>
+<span class="prompt">&#10095; </span><span class="c">winget</span> install BurntSushi.ripgrep
+
+<span class="cm"># Substitui find</span>
+<span class="prompt">&#10095; </span><span class="c">winget</span> install sharkdp.fd
+
+<span class="cm"># Substitui man (resumos pr&aacute;ticos)</span>
+<span class="prompt">&#10095; </span><span class="c">winget</span> install tldr-pages.tlrc
+
+<span class="cm"># Processar JSON</span>
+<span class="prompt">&#10095; </span><span class="c">winget</span> install jqlang.jq
+
+<span class="cm"># git diff bonito (lado a lado)</span>
+<span class="prompt">&#10095; </span><span class="c">winget</span> install dandavison.delta</div>
+    <p><strong>Fecha e abre o terminal</strong> depois de instalar tudo. Verifica:</p>
+    <div class="cmd-block"><span class="prompt">&#10095; </span><span class="c">bat</span> --version
+<span class="prompt">&#10095; </span><span class="c">eza</span> --version
+<span class="prompt">&#10095; </span><span class="c">rg</span> --version
+<span class="prompt">&#10095; </span><span class="c">fd</span> --version
+<span class="prompt">&#10095; </span><span class="c">tldr</span> --version
+<span class="prompt">&#10095; </span><span class="c">jq</span> --version
+<span class="prompt">&#10095; </span><span class="c">delta</span> --version</div>
+    <a class="link-pill" href="https://github.com/sharkdp/bat" target="_blank">bat</a>
+    <a class="link-pill" href="https://github.com/eza-community/eza" target="_blank">eza</a>
+    <a class="link-pill" href="https://github.com/BurntSushi/ripgrep" target="_blank">ripgrep</a>
+    <a class="link-pill" href="https://github.com/sharkdp/fd" target="_blank">fd</a>
+    <a class="link-pill" href="https://github.com/tldr-pages/tlrc" target="_blank">tldr</a>
+    <a class="link-pill" href="https://jqlang.github.io/jq/" target="_blank">jq</a>
+    <a class="link-pill" href="https://github.com/dandavison/delta" target="_blank">delta</a>
+  </div>
+</details>
+
+<details>
+  <summary><span class="step-num bg-cyan c-cyan">4.2</span> Configurar delta como pager do git<span class="step-arrow">&#x25B6;</span></summary>
+  <div class="step-body">
+    <p>Faz o <code>git diff</code> e <code>git log</code> usarem delta automaticamente:</p>
+    <div class="cmd-block"><span class="prompt">&#10095; </span><span class="c">git</span> config --global core.pager delta
+<span class="prompt">&#10095; </span><span class="c">git</span> config --global interactive.diffFilter <span class="s">"delta --color-only"</span>
+<span class="prompt">&#10095; </span><span class="c">git</span> config --global delta.navigate true
+<span class="prompt">&#10095; </span><span class="c">git</span> config --global delta.side-by-side true</div>
+    <div class="info-box success"><span class="info-icon">&#x2714;</span>Agora todo <code>git diff</code>, <code>git show</code> e <code>git log -p</code> mostra diff lado a lado com syntax highlighting.</div>
+  </div>
+</details>
+
+<!-- ╔══════════════════════════════════════╗ -->
+<!-- ║  FASE 5: PRODUTIVIDADE               ║ -->
+<!-- ╚══════════════════════════════════════╝ -->
+<div class="phase">
+  <div class="phase-num bg-orange c-orange">05</div>
+  <div class="phase-info"><h2>Produtividade &amp; Monitoramento</h2><p>Git visual, benchmark, monitor de sistema</p></div>
+</div>
+
+<details>
+  <summary><span class="step-num bg-orange c-orange">5.1</span> Ferramentas de produtividade<span class="step-arrow">&#x25B6;</span></summary>
+  <div class="step-body">
+    <div class="cmd-block"><span class="cm"># Git visual no terminal</span>
+<span class="prompt">&#10095; </span><span class="c">winget</span> install JesseDuffield.lazygit
+
+<span class="cm"># Monitor de sistema (substitui htop)</span>
+<span class="prompt">&#10095; </span><span class="c">winget</span> install aristocratos.btop4win
+
+<span class="cm"># Espa&ccedil;o em disco bonito (substitui df)</span>
+<span class="prompt">&#10095; </span><span class="c">winget</span> install muesli.duf
+
+<span class="cm"># Conta linhas de c&oacute;digo por linguagem</span>
+<span class="prompt">&#10095; </span><span class="c">winget</span> install XAMPPRocky.tokei
+
+<span class="cm"># Benchmark de comandos</span>
+<span class="prompt">&#10095; </span><span class="c">winget</span> install sharkdp.hyperfine
+
+<span class="cm"># sudo do Windows</span>
+<span class="prompt">&#10095; </span><span class="c">winget</span> install gerardog.gsudo</div>
+    <p><strong>Testa r&aacute;pido:</strong></p>
+    <div class="cmd-block"><span class="prompt">&#10095; </span><span class="c">lazygit</span>          <span class="cm"># abre dentro de um repo git</span>
+<span class="prompt">&#10095; </span><span class="c">btop</span>              <span class="cm"># monitor (Ctrl+C pra sair)</span>
+<span class="prompt">&#10095; </span><span class="c">duf</span>               <span class="cm"># espa&ccedil;o em disco</span>
+<span class="prompt">&#10095; </span><span class="c">tokei</span> .            <span class="cm"># linhas de c&oacute;digo</span>
+<span class="prompt">&#10095; </span><span class="c">hyperfine</span> <span class="s">"ping -n 1 google.com"</span></div>
+    <a class="link-pill" href="https://github.com/jesseduffield/lazygit" target="_blank">lazygit</a>
+    <a class="link-pill" href="https://github.com/aristocratos/btop" target="_blank">btop</a>
+    <a class="link-pill" href="https://github.com/muesli/duf" target="_blank">duf</a>
+    <a class="link-pill" href="https://github.com/XAMPPRocky/tokei" target="_blank">tokei</a>
+    <a class="link-pill" href="https://github.com/sharkdp/hyperfine" target="_blank">hyperfine</a>
+    <a class="link-pill" href="https://github.com/gerardog/gsudo" target="_blank">gsudo</a>
+  </div>
+</details>
+
+<!-- ╔══════════════════════════════════════╗ -->
+<!-- ║  FASE 6: INFRA                       ║ -->
+<!-- ╚══════════════════════════════════════╝ -->
+<div class="phase">
+  <div class="phase-num bg-orange c-orange">06</div>
+  <div class="phase-info"><h2>Infra &amp; Database</h2><p>PostgreSQL, scanner de rede, DNS, traceroute</p></div>
+</div>
+
+<details>
+  <summary><span class="step-num bg-orange c-orange">6.1</span> Ferramentas de rede<span class="step-arrow">&#x25B6;</span></summary>
+  <div class="step-body">
+    <div class="cmd-block"><span class="cm"># Ping gr&aacute;fico (m&uacute;ltiplos hosts)</span>
+<span class="prompt">&#10095; </span><span class="c">winget</span> install orf.gping
+
+<span class="cm"># DNS lookup moderno</span>
+<span class="prompt">&#10095; </span><span class="c">winget</span> install mr-karan.doggo
+
+<span class="cm"># Scanner de rede</span>
+<span class="prompt">&#10095; </span><span class="c">winget</span> install Insecure.Nmap</div>
+    <div class="info-box warn"><span class="info-icon">&#x26A0;</span>O nmap instala o <strong>Npcap</strong> junto (driver de captura de pacotes). Aceite a instala&ccedil;&atilde;o do Npcap quando aparecer.</div>
+    <p><strong>Testa:</strong></p>
+    <div class="cmd-block"><span class="prompt">&#10095; </span><span class="c">gping</span> google.com 8.8.8.8 1.1.1.1
+<span class="prompt">&#10095; </span><span class="c">doggo</span> google.com A MX
+<span class="prompt">&#10095; </span><span class="c">nmap</span> -sP 192.168.1.0/24</div>
+    <a class="link-pill" href="https://github.com/orf/gping" target="_blank">gping</a>
+    <a class="link-pill" href="https://github.com/mr-karan/doggo" target="_blank">doggo</a>
+    <a class="link-pill" href="https://nmap.org/" target="_blank">nmap</a>
+  </div>
+</details>
+
+<details>
+  <summary><span class="step-num bg-orange c-orange">6.2</span> WinMTR (traceroute visual) &mdash; .exe avulso<span class="step-arrow">&#x25B6;</span></summary>
+  <div class="step-body">
+    <p>N&atilde;o tem no winget. Baixa o .exe e joga na pasta bin.</p>
+    <p><strong>1. Baixa o <code>WinMTR-v100-static.zip</code></strong> (vers&atilde;o est&aacute;tica, sem depend&ecirc;ncias):</p>
+    <a class="link-pill" href="https://github.com/White-Tiger/WinMTR/releases" target="_blank">&#x2B07; Download</a>
+    <p><strong>2. Cria a pasta bin e extrai:</strong></p>
+    <div class="cmd-block"><span class="cm"># Cria pasta pra .exe avulsos</span>
+<span class="prompt">&#10095; </span><span class="c">New-Item</span> <span class="f">-ItemType</span> Directory <span class="f">-Path</span> <span class="s">"$env:LOCALAPPDATA\bin"</span> <span class="f">-Force</span>
+
+<span class="cm"># Extrai</span>
+<span class="prompt">&#10095; </span><span class="c">Expand-Archive</span> <span class="s">"$env:USERPROFILE\Downloads\WinMTR-v100-static.zip"</span> <span class="f">-DestinationPath</span> <span class="s">"$env:TEMP\winmtr"</span>
+
+<span class="cm"># Descobre onde est&aacute; o .exe</span>
+<span class="prompt">&#10095; </span><span class="c">Get-ChildItem</span> <span class="s">"$env:TEMP\winmtr"</span> <span class="f">-Recurse</span> <span class="f">-Filter</span> <span class="s">"*.exe"</span>
+
+<span class="cm"># Copia a vers&atilde;o 64-bit</span>
+<span class="prompt">&#10095; </span><span class="c">Copy-Item</span> <span class="s">"$env:TEMP\winmtr\WinMTR64.exe"</span> <span class="s">"$env:LOCALAPPDATA\bin\winmtr.exe"</span></div>
+    <p><strong>3. Adiciona a pasta bin no PATH</strong> (s&oacute; precisa fazer uma vez):</p>
+    <div class="cmd-block"><span class="prompt">&#10095; </span>[Environment]::SetEnvironmentVariable(<span class="s">"Path"</span>, <span class="s">"$env:LOCALAPPDATA\bin;"</span> + [Environment]::GetEnvironmentVariable(<span class="s">"Path"</span>, <span class="s">"User"</span>), <span class="s">"User"</span>)</div>
+    <p><strong>Fecha e abre o terminal.</strong> Testa:</p>
+    <div class="cmd-block"><span class="prompt">&#10095; </span><span class="c">winmtr</span></div>
+    <div class="info-box info"><span class="info-icon">&#x2139;</span>A pasta <code>$env:LOCALAPPDATA\bin</code> serve pra qualquer .exe avulso. Joga l&aacute; e j&aacute; funciona como comando.</div>
+  </div>
+</details>
+
+<details>
+  <summary><span class="step-num bg-orange c-orange">6.3</span> pgcli &amp; usql (PostgreSQL / SQL)<span class="step-arrow">&#x25B6;</span></summary>
+  <div class="step-body">
+    <p>Requer Python instalado.</p>
+    <div class="cmd-block"><span class="cm"># PostgreSQL com autocomplete e syntax highlighting</span>
+<span class="prompt">&#10095; </span><span class="c">pip</span> install pgcli
+
+<span class="cm"># Cliente SQL universal (pg, mysql, sqlite, mssql)</span>
+<span class="prompt">&#10095; </span><span class="c">pip</span> install usql</div>
+    <div class="info-box warn"><span class="info-icon">&#x26A0;</span>Se der erro de permiss&atilde;o, adiciona <code>--user</code> no final. Se pedir <code>--break-system-packages</code>, adiciona tamb&eacute;m.</div>
+    <p><strong>Uso:</strong></p>
+    <div class="cmd-block"><span class="cm"># pgcli</span>
+<span class="prompt">&#10095; </span><span class="c">pgcli</span> <span class="f">-h</span> servidor <span class="f">-U</span> usuario <span class="f">-d</span> banco
+
+<span class="cm"># usql</span>
+<span class="prompt">&#10095; </span><span class="c">usql</span> pg://user:pass@host/db</div>
+    <a class="link-pill" href="https://github.com/dbcli/pgcli" target="_blank">pgcli</a>
+    <a class="link-pill" href="https://github.com/xo/usql" target="_blank">usql</a>
+  </div>
+</details>
+
+<!-- ╔══════════════════════════════════════╗ -->
+<!-- ║  FASE 7: PROFILE                     ║ -->
+<!-- ╚══════════════════════════════════════╝ -->
+<div class="phase">
+  <div class="phase-num bg-purple c-purple">07</div>
+  <div class="phase-info"><h2>Profile &mdash; Juntando Tudo</h2><p>O arquivo que carrega toda a configura&ccedil;&atilde;o quando o terminal abre</p></div>
+</div>
+
+<details open>
+  <summary><span class="step-num bg-purple c-purple">7.1</span> Criar / editar o profile<span class="step-arrow">&#x25B6;</span></summary>
+  <div class="step-body">
+    <p>Abre o arquivo do profile:</p>
+    <div class="cmd-block"><span class="prompt">&#10095; </span><span class="c">notepad</span> <span class="v">$PROFILE</span></div>
+    <p>Se der erro dizendo que o arquivo n&atilde;o existe:</p>
+    <div class="cmd-block"><span class="prompt">&#10095; </span><span class="c">New-Item</span> <span class="f">-Path</span> <span class="v">$PROFILE</span> <span class="f">-ItemType</span> File <span class="f">-Force</span>
+<span class="prompt">&#10095; </span><span class="c">notepad</span> <span class="v">$PROFILE</span></div>
+    <p><strong>Cola o profile completo abaixo, salva e fecha o notepad.</strong></p>
+  </div>
+</details>
+
+<details open>
+  <summary><span class="step-num bg-purple c-purple">7.2</span> Profile completo &mdash; copiar e colar<span class="step-arrow">&#x25B6;</span></summary>
+  <div class="step-body">
+<div class="profile-block"><span class="cm"># ═══════════════════════════════════════════════════════</span>
+<span class="cm">#  POWERSHELL PROFILE — fred's setup — dracula edition</span>
+<span class="cm"># ═══════════════════════════════════════════════════════</span>
+
+<span class="v">$env:POSH_THEMES_PATH</span> = <span class="s">"$env:LOCALAPPDATA\Programs\oh-my-posh\themes"</span>
+
+<span class="cm"># --- Oh My Posh ---</span>
+<span class="c">oh-my-posh</span> init pwsh <span class="f">--config</span> <span class="s">"$env:POSH_THEMES_PATH\powerlevel10k_rainbow.omp.json"</span> | <span class="c">Invoke-Expression</span>
+
+<span class="cm"># --- PSReadLine ---</span>
+<span class="c">Import-Module</span> PSReadLine
+<span class="c">Set-PSReadLineKeyHandler</span> <span class="f">-Key</span> Tab       <span class="f">-Function</span> MenuComplete
+<span class="c">Set-PSReadLineOption</span>     <span class="f">-PredictionSource</span> History
+<span class="c">Set-PSReadLineOption</span>     <span class="f">-PredictionViewStyle</span> ListView
+<span class="c">Set-PSReadLineKeyHandler</span> <span class="f">-Key</span> UpArrow   <span class="f">-Function</span> HistorySearchBackward
+<span class="c">Set-PSReadLineKeyHandler</span> <span class="f">-Key</span> DownArrow <span class="f">-Function</span> HistorySearchForward
+<span class="c">Set-PSReadLineKeyHandler</span> <span class="f">-Key</span> Ctrl+d    <span class="f">-Function</span> DeleteCharOrExit
+<span class="c">Set-PSReadLineKeyHandler</span> <span class="f">-Key</span> Ctrl+l    <span class="f">-Function</span> ClearScreen
+
+<span class="cm"># --- Dracula Syntax Colors ---</span>
+<span class="c">Set-PSReadLineOption</span> <span class="f">-Colors</span> @{
+    Command=<span class="s">'#50fa7b'</span>;Parameter=<span class="s">'#ffb86c'</span>;Operator=<span class="s">'#ff79c6'</span>;Variable=<span class="s">'#bd93f9'</span>
+    String=<span class="s">'#f1fa8c'</span>;Number=<span class="s">'#bd93f9'</span>;Type=<span class="s">'#8be9fd'</span>;Comment=<span class="s">'#6272a4'</span>
+    Keyword=<span class="s">'#ff79c6'</span>;Error=<span class="s">'#ff5555'</span>;Member=<span class="s">'#8be9fd'</span>
+    InlinePrediction=<span class="s">'#6272a4'</span>;ListPrediction=<span class="s">'#bd93f9'</span>;Selection=<span class="s">'#44475a'</span>
+}
+
+<span class="cm"># --- PSFzf ---</span>
+<span class="c">Import-Module</span> PSFzf
+<span class="c">Set-PsFzfOption</span> <span class="f">-PSReadlineChordProvider</span> <span class="s">'Ctrl+t'</span>
+<span class="c">Set-PsFzfOption</span> <span class="f">-PSReadlineChordReverseHistory</span> <span class="s">'Ctrl+r'</span>
+
+<span class="cm"># --- Modules ---</span>
+<span class="c">Import-Module</span> Terminal-Icons
+<span class="c">Import-Module</span> posh-git
+<span class="k">if</span> (Get-Module -ListAvailable ZLocation) { <span class="c">Import-Module</span> ZLocation }
+
+<span class="cm"># ═══════════════════════════════════════════════════════</span>
+<span class="cm">#  ALIASES</span>
+<span class="cm"># ═══════════════════════════════════════════════════════</span>
+
+<span class="cm"># Navegação (eza se disponível, senão fallback)</span>
+<span class="k">if</span> (Get-Command eza -ErrorAction SilentlyContinue) {
+    <span class="k">function</span> <span class="c">ll</span> { eza -la --icons --git @args }
+    <span class="k">function</span> <span class="c">la</span> { eza -a --icons @args }
+    <span class="k">function</span> <span class="c">lt</span> { eza --tree --icons --level=2 @args }
+} <span class="k">else</span> {
+    <span class="k">function</span> <span class="c">ll</span> { Get-ChildItem -Force @args }
+    <span class="k">function</span> <span class="c">la</span> { Get-ChildItem -Force -Hidden @args }
+}
+<span class="k">function</span> <span class="c">..</span>   { Set-Location .. }
+<span class="k">function</span> <span class="c">...</span>  { Set-Location ../.. }
+<span class="k">function</span> <span class="c">~</span>    { Set-Location $HOME }
+<span class="k">function</span> <span class="c">mkcd</span> { <span class="k">param</span>($dir) New-Item -ItemType Directory -Path $dir -Force; Set-Location $dir }
+
+<span class="cm"># bat como cat / duf como df (se instalados)</span>
+<span class="k">if</span> (Get-Command bat -ErrorAction SilentlyContinue) { <span class="k">function</span> <span class="c">cat</span> { bat @args } }
+<span class="k">if</span> (Get-Command duf -ErrorAction SilentlyContinue) { <span class="k">function</span> <span class="c">df</span> { duf @args } }
+<span class="k">else</span> { <span class="k">function</span> <span class="c">df</span> { Get-PSDrive -PSProvider FileSystem } }
+
+<span class="cm"># Git</span>
+<span class="k">function</span> <span class="c">gst</span>  { git status }
+<span class="k">function</span> <span class="c">ga</span>   { git add @args }
+<span class="k">function</span> <span class="c">gaa</span>  { git add --all }
+<span class="k">function</span> <span class="c">gc</span>   { git commit -m @args }
+<span class="k">function</span> <span class="c">gp</span>   { git push @args }
+<span class="k">function</span> <span class="c">gl</span>   { git pull @args }
+<span class="k">function</span> <span class="c">glog</span> { git log --oneline --graph --decorate -20 }
+<span class="k">function</span> <span class="c">gd</span>   { git diff @args }
+<span class="k">function</span> <span class="c">gb</span>   { git branch @args }
+<span class="k">function</span> <span class="c">gco</span>  { git checkout @args }
+
+<span class="cm"># Arquivos</span>
+<span class="k">function</span> <span class="c">touch</span> { <span class="k">param</span>($file) <span class="k">if</span> (Test-Path $file) { (Get-Item $file).LastWriteTime = Get-Date } <span class="k">else</span> { New-Item $file -ItemType File } }
+<span class="k">function</span> <span class="c">head</span>  { <span class="k">param</span>($file, $n=10) Get-Content $file -TotalCount $n }
+<span class="k">function</span> <span class="c">tail</span>  { <span class="k">param</span>($file, $n=10) Get-Content $file -Tail $n }
+<span class="k">function</span> <span class="c">which</span> { Get-Command @args | Select-Object -ExpandProperty Source }
+<span class="k">function</span> <span class="c">grep</span>  { Select-String @args }
+
+<span class="cm"># Extract (equivalente do plugin extract do Zsh)</span>
+<span class="k">function</span> <span class="c">extract</span> {
+    <span class="k">param</span>([string]$file)
+    <span class="k">if</span> (-not (Test-Path $file)) { Write-Host <span class="s">"Não encontrado: $file"</span> -ForegroundColor Red; <span class="k">return</span> }
+    <span class="k">switch</span> -Regex ($file) {
+        <span class="s">'\.zip$'</span>             { Expand-Archive $file -DestinationPath (Split-Path $file) }
+        <span class="s">'\.tar\.gz$|\.tgz$'</span>  { tar -xzf $file }
+        <span class="s">'\.tar\.bz2$'</span>        { tar -xjf $file }
+        <span class="s">'\.tar$'</span>             { tar -xf $file }
+        <span class="s">'\.gz$'</span>              { gzip -d $file }
+        <span class="s">'\.7z$'</span>              { 7z x $file }
+        <span class="s">'\.rar$'</span>             { unrar x $file }
+        default              { Write-Host <span class="s">"Formato desconhecido"</span> -ForegroundColor Yellow }
+    }
+}
+
+<span class="cm"># Sistema / Rede</span>
+<span class="k">function</span> <span class="c">myip</span>  { Invoke-RestMethod <span class="s">"https://api.ipify.org"</span> }
+<span class="k">function</span> <span class="c">ports</span> { netstat -ano | Select-String <span class="s">"LISTENING"</span> }
+
+<span class="cm"># Clipboard</span>
+<span class="k">function</span> <span class="c">copypath</span> { (Get-Location).Path | Set-Clipboard; Write-Host <span class="s">"Copiado!"</span> -ForegroundColor Green }
+<span class="k">function</span> <span class="c">copyfile</span> { <span class="k">param</span>($file) Get-Content $file -Raw | Set-Clipboard; Write-Host <span class="s">"Conteúdo copiado!"</span> -ForegroundColor Green }
+
+<span class="cm"># Web search</span>
+<span class="k">function</span> <span class="c">google</span> { <span class="k">param</span>([string]$q) Start-Process <span class="s">"https://www.google.com/search?q=$([uri]::EscapeDataString($q))"</span> }
+<span class="k">function</span> <span class="c">ddg</span>    { <span class="k">param</span>([string]$q) Start-Process <span class="s">"https://duckduckgo.com/?q=$([uri]::EscapeDataString($q))"</span> }
+
+<span class="cm"># Open</span>
+<span class="k">function</span> <span class="c">open</span> { <span class="k">param</span>($path=<span class="s">"."</span>) Start-Process $path }
+
+<span class="cm"># Boas-vindas</span>
+<span class="c">Write-Host</span> <span class="s">"PowerShell $($PSVersionTable.PSVersion) | $(oh-my-posh version)"</span> <span class="f">-ForegroundColor</span> DarkGray</div>
+  </div>
+</details>
+
+<details>
+  <summary><span class="step-num bg-purple c-purple">7.3</span> Aplicar e testar<span class="step-arrow">&#x25B6;</span></summary>
+  <div class="step-body">
+    <p>Recarrega sem fechar o terminal:</p>
+    <div class="cmd-block"><span class="prompt">&#10095; </span>. <span class="v">$PROFILE</span></div>
+    <p>Ou fecha e abre o terminal. Deve aparecer o prompt colorido com a mensagem de boas-vindas.</p>
+    <p><strong>Checklist de teste:</strong></p>
+    <ul class="checklist">
+      <li>Prompt colorido com &iacute;cones apareceu</li>
+      <li>Digita <code>Get-</code> e aperta Tab &rarr; menu interativo</li>
+      <li>Digita comando antigo parcialmente &rarr; sugest&atilde;o cinza aparece</li>
+      <li><code>Ctrl+R</code> &rarr; busca fuzzy no hist&oacute;rico</li>
+      <li><code>Ctrl+T</code> &rarr; busca fuzzy de arquivos</li>
+      <li><code>ll</code> &rarr; lista com &iacute;cones coloridos</li>
+      <li>Entra num repo git &rarr; branch aparece no prompt</li>
+      <li><code>duf</code> &rarr; espa&ccedil;o em disco com barras coloridas</li>
+      <li><code>bat $PROFILE</code> &rarr; profile com syntax highlighting</li>
+    </ul>
+    <div class="info-box success"><span class="info-icon">&#x1F389;</span><strong>Se tudo passou, t&aacute; pronto.</strong> 30+ ferramentas, Dracula theme, e um terminal que faz o Linux ter inveja.</div>
+  </div>
+</details>
+
+<!-- ╔══════════════════════════════════════╗ -->
+<!-- ║  TROUBLESHOOTING                     ║ -->
+<!-- ╚══════════════════════════════════════╝ -->
+<div class="phase">
+  <div class="phase-num bg-red c-red">&#x1F6A8;</div>
+  <div class="phase-info"><h2>Troubleshooting</h2><p>Quando der merda (e vai dar, &eacute; Windows)</p></div>
+</div>
+
+<details>
+  <summary><span class="step-num bg-red c-red">!</span> CONFIG NOT FOUND<span class="step-arrow">&#x25B6;</span></summary>
+  <div class="step-body">
+    <p>A vari&aacute;vel <code>$env:POSH_THEMES_PATH</code> t&aacute; vazia ou o tema n&atilde;o existe.</p>
+    <p><strong>Fix:</strong> Certifique-se que essa linha est&aacute; <strong>antes</strong> do <code>oh-my-posh init</code> no profile:</p>
+    <div class="cmd-block"><span class="v">$env:POSH_THEMES_PATH</span> = <span class="s">"$env:LOCALAPPDATA\Programs\oh-my-posh\themes"</span></div>
+    <p>Se a pasta est&aacute; vazia, volte ao passo <strong>2.3</strong> e baixe os temas.</p>
+  </div>
+</details>
+
+<details>
+  <summary><span class="step-num bg-red c-red">!</span> &Iacute;cones aparecem como &#x25A1;&#x25A1;&#x25A1;<span class="step-arrow">&#x25B6;</span></summary>
+  <div class="step-body">
+    <p>Nerd Font n&atilde;o est&aacute; configurada no Windows Terminal.</p>
+    <p><strong>Fix:</strong> Settings &rarr; Profiles &rarr; Defaults &rarr; Appearance &rarr; Font face &rarr; <strong>JetBrainsMono Nerd Font</strong></p>
+    <a class="link-pill" href="https://www.nerdfonts.com/font-downloads" target="_blank">&#x2B07; Baixar fontes</a>
+  </div>
+</details>
+
+<details>
+  <summary><span class="step-num bg-red c-red">!</span> Ctrl+R n&atilde;o faz nada<span class="step-arrow">&#x25B6;</span></summary>
+  <div class="step-body">
+    <p>O bin&aacute;rio <code>fzf</code> n&atilde;o est&aacute; instalado. PSFzf depende dele.</p>
+    <div class="cmd-block"><span class="prompt">&#10095; </span><span class="c">winget</span> install junegunn.fzf</div>
+    <p>Fecha e abre o terminal.</p>
+  </div>
+</details>
+
+<details>
+  <summary><span class="step-num bg-red c-red">!</span> Comando n&atilde;o reconhecido ap&oacute;s winget install<span class="step-arrow">&#x25B6;</span></summary>
+  <div class="step-body">
+    <p>O PATH ainda n&atilde;o foi atualizado na sess&atilde;o atual.</p>
+    <p><strong>Fix:</strong> Fecha e abre o terminal. Se persistir, verifica se instalou mesmo:</p>
+    <div class="cmd-block"><span class="prompt">&#10095; </span><span class="c">winget</span> list nome-do-pacote</div>
+  </div>
+</details>
+
+<details>
+  <summary><span class="step-num bg-red c-red">!</span> Terminal demora mais de 2s pra abrir<span class="step-arrow">&#x25B6;</span></summary>
+  <div class="step-body">
+    <p>Muitos m&oacute;dulos carregando. Mede o tempo:</p>
+    <div class="cmd-block"><span class="prompt">&#10095; </span><span class="c">Measure-Command</span> { . <span class="v">$PROFILE</span> }</div>
+    <p>Comenta m&oacute;dulos um por um no profile at&eacute; achar o culpado. Geralmente &eacute; um m&oacute;dulo que n&atilde;o instalou ou est&aacute; corrompido.</p>
+  </div>
+</details>
+
+<details>
+  <summary><span class="step-num bg-red c-red">!</span> .exe avulso n&atilde;o roda<span class="step-arrow">&#x25B6;</span></summary>
+  <div class="step-body">
+    <p>O .exe n&atilde;o est&aacute; no PATH. Joga em <code>$env:LOCALAPPDATA\bin</code> e certifica que a pasta est&aacute; no PATH:</p>
+    <div class="cmd-block"><span class="prompt">&#10095; </span><span class="c">$env:Path</span> -split <span class="s">";"</span> | Select-String <span class="s">"bin"</span></div>
+    <p>Se n&atilde;o aparecer, adiciona:</p>
+    <div class="cmd-block"><span class="prompt">&#10095; </span>[Environment]::SetEnvironmentVariable(<span class="s">"Path"</span>, <span class="s">"$env:LOCALAPPDATA\bin;"</span> + [Environment]::GetEnvironmentVariable(<span class="s">"Path"</span>, <span class="s">"User"</span>), <span class="s">"User"</span>)</div>
+  </div>
+</details>
+
+<footer>powershell turbinado &mdash; <span>fred's setup</span> &mdash; 2026 &mdash; guia de instala&ccedil;&atilde;o &mdash; dracula edition</footer>
+</div>
+</body>
+</html>
